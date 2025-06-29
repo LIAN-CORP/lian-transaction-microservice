@@ -5,8 +5,10 @@ import com.lian.marketing.transactionmicroservice.domain.spi.IClientPersistenceP
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ClientMapper;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ClientAdapter implements IClientPersistencePort {
 
@@ -15,6 +17,7 @@ public class ClientAdapter implements IClientPersistencePort {
 
     @Override
     public Mono<Void> saveClient(Client client) {
+        log.info("Saving client {}", client);
         return clientRepository.save(clientMapper.toEntity(client)).then();
     }
 
