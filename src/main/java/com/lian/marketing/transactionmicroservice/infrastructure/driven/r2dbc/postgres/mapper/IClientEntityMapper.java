@@ -5,7 +5,7 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import org.mapstruct.Mapper;
 
 @Mapper
-public interface ClientMapper {
+public interface IClientEntityMapper {
     ClientEntity toEntity(Client client);
     Client toModel(ClientEntity clientEntity);
 }
