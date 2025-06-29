@@ -8,8 +8,6 @@ public record CreateClientRequest (
         String name,
 
         @NotEmpty(message = ConstantDto.CLIENT_PHONE_MUST_BE_NOT_EMPTY)
-        @Min(value = ConstantDto.MIN_CLIENT_PHONE_LENGTH, message = ConstantDto.CLIENT_PHONE_MESSAGE)
-        @Max(value = ConstantDto.MAX_CLIENT_PHONE_LENGTH, message = ConstantDto.CLIENT_PHONE_MESSAGE)
         @Pattern(regexp = ConstantDto.CLIENT_PHONE_REGEX)
         String phone
 ) {}
