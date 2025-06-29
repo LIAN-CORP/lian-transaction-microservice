@@ -9,5 +9,5 @@ public class ConstantDto {
     public static final int MAX_CLIENT_PHONE_LENGTH = 10;
     public static final int MIN_CLIENT_PHONE_LENGTH = 10;
     public static final String CLIENT_PHONE_MESSAGE = "Phone must be 10 digits max";
-    public static final String CLIENT_PHONE_REGEX = "^\\[0-9]{10}$";
+    public static final String CLIENT_PHONE_REGEX = "^\\d{10}$";
 }
