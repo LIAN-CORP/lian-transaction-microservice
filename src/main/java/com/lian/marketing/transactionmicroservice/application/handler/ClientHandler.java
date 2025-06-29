@@ -4,8 +4,10 @@ import com.lian.marketing.transactionmicroservice.application.dto.request.Create
 import com.lian.marketing.transactionmicroservice.application.mapper.IClientMapper;
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+@Service
 @RequiredArgsConstructor
 public class ClientHandler {
     private final IClientServicePort clientServicePort;
