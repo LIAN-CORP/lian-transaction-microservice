@@ -29,7 +29,6 @@ public class ClientUseCase implements IClientServicePort {
                         client.setPhone(GeneralConstants.COLOMBIA_PREFIX + client.getPhone());
                         log.info("Phone number has no prefix, adding prefix to +57 to {}", client.getPhone());
                     }
-                    client.setId(UUID.randomUUID());
                     return clientPersistencePort.saveClient(client);
                 }))
                 .then();
