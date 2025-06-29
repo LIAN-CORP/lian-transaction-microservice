@@ -45,9 +45,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     //OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
-    //Liquibase migrations
-    implementation 'org.liquibase:liquibase-core'
-    runtimeOnly 'org.springframework:spring-jdbc'
+    //Flyway
+    implementation "org.flywaydb:flyway-database-postgresql"
 }
 
 dependencyManagement {
