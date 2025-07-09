@@ -1,0 +1,8 @@
+package com.lian.marketing.transactionmicroservice.domain.api;
+
+import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import reactor.core.publisher.Mono;
+
+public interface ITransactionServicePort {
+    Mono<Void> createTransaction(Transaction transaction);
+}
