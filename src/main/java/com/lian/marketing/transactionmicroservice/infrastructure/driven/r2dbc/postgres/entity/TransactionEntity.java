@@ -1,5 +1,6 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity;
 
+import com.lian.marketing.transactionmicroservice.domain.model.type_movement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
