@@ -26,6 +26,7 @@ public class TransactionUseCase implements ITransactionServicePort {
                 .then(clientServicePort.existsById(transaction.getClient().getId()))
                 .flatMap(client -> {
                     Mono<Void> saveClientIfNeeded = client ? Mono.empty() : clientServicePort.saveClient(transaction.getClient());
+                    log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
                     return saveClientIfNeeded.then(transactionPersistencePort.saveTransaction(transaction));
                 });
     }
