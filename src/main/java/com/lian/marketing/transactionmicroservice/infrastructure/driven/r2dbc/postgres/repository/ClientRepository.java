@@ -1,6 +1,5 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository;
 
-import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.ClientEntity;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;

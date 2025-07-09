@@ -32,7 +32,11 @@ public class ClientUseCase implements IClientServicePort {
                     return clientPersistencePort.saveClient(client);
                 }))
                 .then();
-
-
     }
+
+    @Override
+    public Mono<Boolean> existsById(UUID id) {
+        return clientPersistencePort.userExists(id);
+    }
+
 }
