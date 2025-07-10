@@ -1,50 +1,41 @@
 package com.lian.marketing.transactionmicroservice.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
+@RequiredArgsConstructor
 class WebClientConfig {
 
-    @Value("${microservice.url.stock}")
-    private String stockMicroserviceUrl;
-
-    @Value("${microservice.url.user}")
-    private String userMicroserviceUrl;
-
-    @Value("${microservice.url.payment}")
-    private String paymentMicroserviceUrl;
-
-    @Value("${microservice.url.notification}")
-    private String notificationMicroserviceUrl;
+    private final MicroservicesConfig url;
 
     @Bean(name = "stockWebClient")
     public WebClient stockWebClient() {
         return WebClient.builder()
-                .baseUrl(stockMicroserviceUrl)
+                .baseUrl(url.getStock())
                 .build();
     }
 
     @Bean(name = "userWebClient")
     public WebClient userWebClient() {
         return WebClient.builder()
-                .baseUrl(userMicroserviceUrl)
+                .baseUrl(url.getUser())
                 .build();
     }
 
     @Bean(name = "paymentWebClient")
     public WebClient paymentWebClient(){
         return WebClient.builder()
-                .baseUrl(paymentMicroserviceUrl)
+                .baseUrl(url.getPayment())
                 .build();
     }
 
     @Bean(name = "notificationWebClient")
     public WebClient notificationWebClient() {
         return WebClient.builder()
-                .baseUrl(notificationMicroserviceUrl)
+                .baseUrl(url.getNotification())
                 .build();
     }
 
