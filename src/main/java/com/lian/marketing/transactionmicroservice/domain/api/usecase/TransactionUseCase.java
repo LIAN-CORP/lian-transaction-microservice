@@ -23,7 +23,7 @@ public class TransactionUseCase implements ITransactionServicePort {
         return transactionPersistencePort.userExists(transaction.getUserId())
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Mono.error(new UserDoNotExistsException(GeneralConstants.USER_DO_NOT_EXISTS)))
-                .then(clientServicePort.existsById(transaction.getClient().getId()))
+                .then(clientServicePort.existsByPhone(transaction.getClient().getPhone()))
                 .flatMap(client -> {
                     Mono<Void> saveClientIfNeeded = client ? Mono.empty() : clientServicePort.saveClient(transaction.getClient());
                     log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
