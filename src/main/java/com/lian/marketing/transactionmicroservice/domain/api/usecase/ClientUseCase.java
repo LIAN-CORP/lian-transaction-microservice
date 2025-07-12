@@ -35,8 +35,10 @@ public class ClientUseCase implements IClientServicePort {
     }
 
     @Override
-    public Mono<Boolean> existsById(UUID id) {
-        return clientPersistencePort.userExists(id);
+    public Mono<Boolean> existsByPhone(String phone) {
+        return clientPersistencePort.findClientByPhone(phone)
+                .map(client -> true)
+                .defaultIfEmpty(false);
     }
 
 }

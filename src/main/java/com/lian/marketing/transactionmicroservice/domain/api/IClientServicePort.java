@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface IClientServicePort {
     Mono<Void> saveClient(Client client);
-    Mono<Boolean> existsById(UUID id);
+    Mono<Boolean> existsByPhone(String phone);
 }
