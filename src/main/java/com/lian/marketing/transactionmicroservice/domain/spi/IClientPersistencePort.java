@@ -6,7 +6,8 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 public interface IClientPersistencePort {
-    Mono<Void> saveClient(Client client);
+    Mono<UUID> saveClient(Client client);
     Mono<Client> findClientByPhone(String phone);
     Mono<Boolean> userExists(UUID id);
+    Mono<UUID> findIdByPhone(String phone);
 }

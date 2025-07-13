@@ -40,10 +40,11 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     @Override
     public Mono<Boolean> userExists(UUID id) {
         return userWebClient.get()
-                .uri("/user/exists/{id}", id)
+                .uri("/user/exists/{id}", id.toString())
                 .retrieve()
                 .bodyToMono(ExistsResponse.class)
-                .map(ExistsResponse::exists);
+                .map(ExistsResponse::exists)
+                .doOnNext(exists -> log.info("User exists: {}", exists));
     }
 
 }

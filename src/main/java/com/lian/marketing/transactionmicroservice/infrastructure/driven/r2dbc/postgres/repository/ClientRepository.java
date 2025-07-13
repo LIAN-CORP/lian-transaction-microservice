@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ClientRepository extends ReactiveCrudRepository<ClientEntity, UUID> {
     Mono<ClientEntity> findByPhone(String phone);
+    Mono<UUID> findIdByPhone(String phone);
 }

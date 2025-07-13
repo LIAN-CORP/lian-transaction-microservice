@@ -11,5 +11,6 @@ public interface ITransactionEntityMapper {
         target = "clientId",
         expression = "java( transaction.getClient().getId() )"
     )
+    @Mapping(target = "typeMovement", expression = "java( transaction.getTypeMovement().name())")
     TransactionEntity toEntity(Transaction transaction);
 }

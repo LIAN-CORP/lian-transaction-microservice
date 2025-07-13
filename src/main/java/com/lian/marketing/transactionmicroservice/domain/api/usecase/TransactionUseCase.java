@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 @Slf4j
 @RequiredArgsConstructor
 public class TransactionUseCase implements ITransactionServicePort {
@@ -25,9 +28,14 @@ public class TransactionUseCase implements ITransactionServicePort {
                 .switchIfEmpty(Mono.error(new UserDoNotExistsException(GeneralConstants.USER_DO_NOT_EXISTS)))
                 .then(clientServicePort.existsByPhone(transaction.getClient().getPhone()))
                 .flatMap(client -> {
-                    Mono<Void> saveClientIfNeeded = client ? Mono.empty() : clientServicePort.saveClient(transaction.getClient());
-                    log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
-                    return saveClientIfNeeded.then(transactionPersistencePort.saveTransaction(transaction));
+                    Mono<UUID> saveClientIfNeeded = client ? clientServicePort.findIdByPhone(transaction.getClient().getPhone()) : clientServicePort.saveClientAndGetId(transaction.getClient());
+
+                    return saveClientIfNeeded.flatMap(clientId -> {
+                       transaction.getClient().setId(clientId);
+                       transaction.setTransactionDate(LocalDate.now());
+                       log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
+                       return transactionPersistencePort.saveTransaction(transaction);
+                    });
                 });
     }
 }
