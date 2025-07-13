@@ -3,7 +3,6 @@ package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
-import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
