@@ -1,5 +1,6 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.exceptionhandler;
 
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,6 +27,17 @@ public class GeneralControllerAdvisor {
 
     @ExceptionHandler(ServerWebInputException.class)
     public Mono<ResponseEntity<ExceptionResponse>> handlerServerWebInputException(ServerWebInputException e) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.toString(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage(),
+                        LocalDateTime.now()
+                )));
+    }
+
+    @ExceptionHandler(ClientPhoneNumberIsNotValid.class)
+    public Mono<ResponseEntity<ExceptionResponse>> handleClientPhoneNumberIsNotValid(ClientPhoneNumberIsNotValid e) {
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(
                         HttpStatus.BAD_REQUEST.toString(),

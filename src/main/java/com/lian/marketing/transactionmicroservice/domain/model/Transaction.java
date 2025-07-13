@@ -2,6 +2,7 @@ package com.lian.marketing.transactionmicroservice.domain.model;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -9,10 +10,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class Client {
+public class Transaction {
 
     private UUID id;
-    private String name;
-    private String phone;
+    private type_movement typeMovement;
+    private LocalDate transactionDate;
+    private Client client;
+    private UUID userId;
 
 }
