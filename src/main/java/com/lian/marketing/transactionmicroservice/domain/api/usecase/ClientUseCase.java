@@ -3,8 +3,10 @@ package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneAlreadyExistsException;
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import com.lian.marketing.transactionmicroservice.domain.spi.IClientPersistencePort;
+import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -19,18 +21,14 @@ public class ClientUseCase implements IClientServicePort {
 
     @Override
     public Mono<Void> saveClient(Client client) {
+        String phone = DomainUtils.transformPhoneNumber(client.getPhone());
+        client.setPhone(phone);
         return clientPersistencePort.findClientByPhone(client.getPhone())
                 .flatMap(existing -> {
                     log.warn("Client with phone {} already exists", client.getPhone());
                     return Mono.error(new ClientPhoneAlreadyExistsException("Phone number already exists"));
                 })
-                .switchIfEmpty(Mono.defer(() -> {
-                    if(client.getPhone().length() < 10) {
-                        client.setPhone(GeneralConstants.COLOMBIA_PREFIX + client.getPhone());
-                        log.info("Phone number has no prefix, adding prefix to +57 to {}", client.getPhone());
-                    }
-                    return clientPersistencePort.saveClient(client);
-                }))
+                .switchIfEmpty(clientPersistencePort.saveClient(client))
                 .then();
     }
 
@@ -48,7 +46,10 @@ public class ClientUseCase implements IClientServicePort {
 
     @Override
     public Mono<UUID> saveClientAndGetId(Client client) {
-        return clientPersistencePort.saveClient(client);
+        return Mono.defer(() -> {
+            client.setPhone(DomainUtils.transformPhoneNumber(client.getPhone()));
+            return clientPersistencePort.saveClient(client);
+        });
     }
 
 }
