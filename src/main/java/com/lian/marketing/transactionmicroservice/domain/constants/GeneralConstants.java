@@ -9,4 +9,5 @@ public class GeneralConstants {
     public static final String SAVING_TRANSACTION_SFL4J = "Saving transaction {}";
     public static final String TRANSACTION_SAVED_SFL4J = "Transaction saved with id {}";
     public static final String TYPE_MOVEMENT_NOT_VALID = "Type movement '%s' not valid";
+    public static final String CLIENT_PHONE_IS_NOT_VALID = "Client phone '%s' is not valid";
 }
