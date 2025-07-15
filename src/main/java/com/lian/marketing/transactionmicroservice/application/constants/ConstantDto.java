@@ -14,4 +14,9 @@ public class ConstantDto {
     // TRANSACTION
     public static final String TRANSACTION_TYPE_MOVEMENT_MUST_BE_NOT_EMPTY = "Transaction type movement must be not empty";
     public static final String USER_ID_MUST_BE_NOT_EMPTY = "User id must be not empty";
+
+    //Products
+    public static final String PRODUCT_LIST_MUST_BE_NOT_EMPTY = "Product list must be not empty";
+    public static final String PRODUCT_ID_MUST_BE_NOT_EMPTY = "Product id must be not empty";
+    public static final String PRODUCT_QUANTITY_IS_NOT_VALID = "Product quantity is not valid";
 }
