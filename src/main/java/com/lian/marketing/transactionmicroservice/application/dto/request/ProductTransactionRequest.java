@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.UUID;
 
-public record ProductQuantityRequest(
+public record ProductTransactionRequest(
         @NotEmpty(message = ConstantDto.PRODUCT_ID_MUST_BE_NOT_EMPTY)
         UUID productId,
         @Min(value = 1, message = ConstantDto.PRODUCT_QUANTITY_IS_NOT_VALID)
