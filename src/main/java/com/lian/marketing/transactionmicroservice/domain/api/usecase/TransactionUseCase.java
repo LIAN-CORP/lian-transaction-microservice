@@ -4,6 +4,8 @@ import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
+import com.lian.marketing.transactionmicroservice.domain.model.CompleteTransaction;
+import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -40,5 +43,15 @@ public class TransactionUseCase implements ITransactionServicePort {
                        return transactionPersistencePort.saveTransaction(transaction);
                     });
                 });
+    }
+
+    @Override
+    public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction) {
+        return this.createTransaction(completeTransaction.getTransaction())
+                .then(discountProductStock(completeTransaction.getProductTransactions()));
+    }
+
+    private Mono<Void> discountProductStock(List<ProductTransaction> productTransactions) {
+        return transactionPersistencePort.discountProductStock(productTransactions);
     }
 }
