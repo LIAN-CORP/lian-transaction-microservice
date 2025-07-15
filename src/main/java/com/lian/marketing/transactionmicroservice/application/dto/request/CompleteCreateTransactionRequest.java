@@ -9,6 +9,6 @@ public record CompleteCreateTransactionRequest(
         @Valid
         CreateTransactionRequest transaction,
         @NotEmpty(message = ConstantDto.PRODUCT_LIST_MUST_BE_NOT_EMPTY)
-        List<ProductQuantityRequest> products
+        List<ProductTransactionRequest> products
 ) {
 }
