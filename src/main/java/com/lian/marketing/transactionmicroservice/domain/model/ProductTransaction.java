@@ -11,5 +11,4 @@ import java.util.UUID;
 public class ProductTransaction {
     private UUID id;
     private Integer quantity;
-    private Double priceSell;
 }
