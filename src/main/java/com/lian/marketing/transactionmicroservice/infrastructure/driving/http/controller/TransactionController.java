@@ -1,6 +1,6 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.controller;
 
-import com.lian.marketing.transactionmicroservice.application.dto.request.CreateTransactionRequest;
+import com.lian.marketing.transactionmicroservice.application.dto.request.CompleteCreateTransactionRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class TransactionController {
 
     @PostMapping
     public Mono<ResponseEntity<Void>> saveTransaction(
-            @Valid @RequestBody CreateTransactionRequest request
+            @Valid @RequestBody CompleteCreateTransactionRequest request
             ) {
         return transactionHandler.saveTransaction(request).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
     }
