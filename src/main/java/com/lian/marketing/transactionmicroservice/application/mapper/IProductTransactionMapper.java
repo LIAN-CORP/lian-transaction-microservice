@@ -7,6 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface IProductTransactionMapper {
-    @Mapping(target = "priceSell", ignore = true)
+    @Mapping(source = "productId", target = "id")
     ProductTransaction toModelFromRequest(ProductTransactionRequest productTransactionRequest);
 }
