@@ -48,7 +48,7 @@ public class TransactionUseCase implements ITransactionServicePort {
     @Override
     public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction) {
         return this.createTransaction(completeTransaction.getTransaction())
-                .then(discountProductStock(completeTransaction.getProductTransactions()));
+                .then(discountProductStock(completeTransaction.getProducts()));
     }
 
     private Mono<Void> discountProductStock(List<ProductTransaction> productTransactions) {
