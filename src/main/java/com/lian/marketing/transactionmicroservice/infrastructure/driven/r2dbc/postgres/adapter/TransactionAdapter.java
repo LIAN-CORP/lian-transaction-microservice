@@ -1,6 +1,7 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.adapter;
 
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
 import com.lian.marketing.transactionmicroservice.domain.model.ExistsResponse;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
@@ -9,6 +10,7 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -61,6 +63,7 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(productTransactions)
                 .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
                 .toBodilessEntity()
                 .then();
     }
