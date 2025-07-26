@@ -53,7 +53,7 @@ public class TransactionUseCase implements ITransactionServicePort {
         return this.discountProductStock(completeTransaction.getProducts())
                 .then(this.createTransaction(completeTransaction.getTransaction()))
                 .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
-                            new DetailTransaction(null, transactionId, null, null, null), completeTransaction.getProducts()
+                            new DetailTransaction(null, null, null, transactionId, null), completeTransaction.getProducts()
                     )
                 );
     }

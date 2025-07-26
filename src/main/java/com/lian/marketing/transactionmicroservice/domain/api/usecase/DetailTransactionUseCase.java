@@ -24,12 +24,14 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
         products = mergeRepeatedProducts(products);
         return Flux.fromIterable(products)
                 .flatMap(product -> {
-                    detailTransaction.setProductId(product.getId());
-                    detailTransaction.setQuantity(product.getQuantity());
+                    DetailTransaction newDetailTransaction = new DetailTransaction();
+                    newDetailTransaction.setTransactionId(detailTransaction.getTransactionId());
+                    newDetailTransaction.setProductId(product.getId());
+                    newDetailTransaction.setQuantity(product.getQuantity());
                     return detailTransactionPersistencePort.getProductPriceById(product.getId())
                             .flatMap(price -> {
-                                detailTransaction.setUnitPrice(null);
-                                return detailTransactionPersistencePort.saveDetailTransaction(detailTransaction);
+                                newDetailTransaction.setUnitPrice(price);
+                                return detailTransactionPersistencePort.saveDetailTransaction(newDetailTransaction);
                             });
                 })
                 .then();

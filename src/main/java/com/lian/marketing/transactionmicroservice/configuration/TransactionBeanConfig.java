@@ -18,6 +18,7 @@ public class TransactionBeanConfig {
     private final TransactionRepository transactionRepository;
     private final WebClientConfig client;
     private final ClientBeanConfiguration clientBeanConfiguration;
+    private final DetailTransactionBeanConfig detailTransactionBeanConfig;
 
     @Bean
     public ITransactionPersistencePort transactionPersistencePort() {
@@ -26,6 +27,6 @@ public class TransactionBeanConfig {
 
     @Bean
     public ITransactionServicePort transactionServicePort() {
-        return new TransactionUseCase(transactionPersistencePort(), clientBeanConfiguration.clientServicePort());
+        return new TransactionUseCase(transactionPersistencePort(), clientBeanConfiguration.clientServicePort(), detailTransactionBeanConfig.detailTransactionServicePort());
     }
 }
