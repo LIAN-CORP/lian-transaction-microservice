@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ITransactionPersistencePort {
-    Mono<Void> saveTransaction(Transaction transaction);
+    Mono<UUID> saveTransaction(Transaction transaction);
     Mono<Boolean> userExists(UUID id);
     Mono<Void> discountProductStock(List<ProductTransaction> productTransactions);
 }

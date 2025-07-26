@@ -6,6 +6,7 @@ import com.lian.marketing.transactionmicroservice.domain.model.ExistsResponse;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TransactionEntity;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +41,10 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     }
 
     @Override
-    public Mono<Void> saveTransaction(Transaction transaction) {
+    public Mono<UUID> saveTransaction(Transaction transaction) {
         return transactionRepository.save(transactionEntityMapper.toEntity(transaction))
                 .doOnNext(t -> log.info(GeneralConstants.TRANSACTION_SAVED_SFL4J, t.getId()))
-                .then();
+                .map(TransactionEntity::getId);
     }
 
     @Override
