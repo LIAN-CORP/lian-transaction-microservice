@@ -18,7 +18,7 @@ public class DetailTransactionEntity {
     @Id
     private UUID id;
     @Column("unit_price")
-    private Integer unitPrice;
+    private Double unitPrice;
     @Column("quantity")
     private Integer quantity;
     @Column("transaction_id")

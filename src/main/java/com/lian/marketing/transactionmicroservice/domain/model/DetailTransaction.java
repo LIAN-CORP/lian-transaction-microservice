@@ -12,8 +12,8 @@ import java.util.UUID;
 @Setter @Getter
 public class DetailTransaction {
     private UUID id;
+    private Double unitPrice;
+    private Integer quantity;
     private UUID transactionId;
     private UUID productId;
-    private Integer quantity;
-    private Integer unitPrice;
 }
