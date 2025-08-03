@@ -43,4 +43,13 @@ public class DetailTransactionAdapter implements IDetailTransactionPersistencePo
                 .bodyToMono(Double.class)
                 .doOnNext(price -> log.info("Product price: {}", price));
     }
+
+    @Override
+    public Mono<Double> getProductBuyPriceById(UUID productId) {
+        return productWebClient.get()
+                .uri("/product/price/buy/{id}", productId.toString())
+                .retrieve()
+                .bodyToMono(Double.class)
+                .doOnNext(price -> log.info("Product price: {}", price));
+    }
 }

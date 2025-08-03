@@ -50,15 +50,30 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     @Override
     public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction) {
-        return this.discountProductStock(completeTransaction.getProducts())
-                .then(this.createTransaction(completeTransaction.getTransaction()))
-                .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
-                            new DetailTransaction(null, null, null, transactionId, null), completeTransaction.getProducts()
-                    )
-                );
+        if(completeTransaction.getTransaction().getTypeMovement().name().equals(GeneralConstants.SELL_TRANSACTION)) {
+            return this.discountProductStock(completeTransaction.getProducts())
+                    .then(this.createTransaction(completeTransaction.getTransaction()))
+                    .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
+                                new DetailTransaction(null, null, null, transactionId, null), completeTransaction.getProducts(), completeTransaction.getTransaction().getTypeMovement().name()
+                        )
+                    );
+        }
+        if(completeTransaction.getTransaction().getTypeMovement().name().equals(GeneralConstants.BUY_TRANSACTION)) {
+            return this.addProductStock(completeTransaction.getProducts())
+                    .then(this.createTransaction(completeTransaction.getTransaction()))
+                    .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
+                                new DetailTransaction(null, null, null, transactionId, null), completeTransaction.getProducts(), completeTransaction.getTransaction().getTypeMovement().name()
+                        )
+                    );
+        }
+        return Mono.empty();
     }
 
     private Mono<Void> discountProductStock(List<ProductTransaction> productTransactions) {
         return transactionPersistencePort.discountProductStock(productTransactions);
+    }
+
+    private Mono<Void> addProductStock(List<ProductTransaction> productTransactions) {
+        return transactionPersistencePort.addProductStock(productTransactions);
     }
 }

@@ -1,6 +1,7 @@
 package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
+import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.model.DetailTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.IDetailTransactionPersistencePort;
@@ -20,7 +21,7 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
     private final IDetailTransactionPersistencePort detailTransactionPersistencePort;
 
     @Override
-    public Mono<Void> createDetailTransaction(DetailTransaction detailTransaction, List<ProductTransaction> products) {
+    public Mono<Void> createDetailTransaction(DetailTransaction detailTransaction, List<ProductTransaction> products, String typeMovement) {
         products = mergeRepeatedProducts(products);
         return Flux.fromIterable(products)
                 .flatMap(product -> {
@@ -28,11 +29,24 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
                     newDetailTransaction.setTransactionId(detailTransaction.getTransactionId());
                     newDetailTransaction.setProductId(product.getId());
                     newDetailTransaction.setQuantity(product.getQuantity());
-                    return detailTransactionPersistencePort.getProductPriceById(product.getId())
+
+                    if(GeneralConstants.SELL_TRANSACTION.equals(typeMovement)){ //VENTA
+                        return detailTransactionPersistencePort.getProductPriceById(product.getId())
                             .flatMap(price -> {
                                 newDetailTransaction.setUnitPrice(price);
                                 return detailTransactionPersistencePort.saveDetailTransaction(newDetailTransaction);
                             });
+                    }
+
+                    if(GeneralConstants.BUY_TRANSACTION.equals(typeMovement)) {
+                        return detailTransactionPersistencePort.getProductBuyPriceById(product.getId())
+                                .flatMap(price -> {
+                                    newDetailTransaction.setUnitPrice(price);
+                                    return detailTransactionPersistencePort.saveDetailTransaction(newDetailTransaction);
+                                });
+                    }
+
+                    return Mono.empty(); //TODO: Terminar para fiado
                 })
                 .then();
     }

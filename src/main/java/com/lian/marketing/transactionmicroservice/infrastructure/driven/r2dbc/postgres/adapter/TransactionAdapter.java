@@ -69,4 +69,16 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .then();
     }
 
+    @Override
+    public Mono<Void> addProductStock(List<ProductTransaction> productTransactions) {
+        return productWebClient.post()
+                .uri("/product/stock/add")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productTransactions)
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
 }

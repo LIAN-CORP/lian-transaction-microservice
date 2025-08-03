@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface IDetailTransactionServicePort {
-    Mono<Void> createDetailTransaction(DetailTransaction detailTransaction, List<ProductTransaction> products);
+    Mono<Void> createDetailTransaction(DetailTransaction detailTransaction, List<ProductTransaction> products, String typeMovement);
 }

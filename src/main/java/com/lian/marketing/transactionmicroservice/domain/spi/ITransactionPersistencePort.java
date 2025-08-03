@@ -11,4 +11,5 @@ public interface ITransactionPersistencePort {
     Mono<UUID> saveTransaction(Transaction transaction);
     Mono<Boolean> userExists(UUID id);
     Mono<Void> discountProductStock(List<ProductTransaction> productTransactions);
+    Mono<Void> addProductStock(List<ProductTransaction> productTransactions);
 }
