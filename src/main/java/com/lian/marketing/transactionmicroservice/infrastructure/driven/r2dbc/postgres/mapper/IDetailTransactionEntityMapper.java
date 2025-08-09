@@ -7,4 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface IDetailTransactionEntityMapper {
     DetailTransactionEntity toEntityFromModel(DetailTransaction detailTransaction);
+    DetailTransaction toModelFromEntity(DetailTransactionEntity detailTransactionEntity);
 }

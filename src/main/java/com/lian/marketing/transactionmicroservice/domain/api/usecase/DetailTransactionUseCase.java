@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,6 +50,11 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
                     return Mono.empty(); //TODO: Terminar para fiado
                 })
                 .then();
+    }
+
+    @Override
+    public Mono<Double> getTotalAmountByTransactionId(UUID transactionId) {
+        return detailTransactionPersistencePort.findDetailTransactionsByTransactionId(transactionId);
     }
 
     private List<ProductTransaction> mergeRepeatedProducts(List<ProductTransaction> products) {

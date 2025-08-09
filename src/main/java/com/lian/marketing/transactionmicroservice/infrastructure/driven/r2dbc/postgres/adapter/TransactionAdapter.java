@@ -3,6 +3,7 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.p
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
 import com.lian.marketing.transactionmicroservice.domain.model.ExistsResponse;
+import com.lian.marketing.transactionmicroservice.domain.model.PaymentTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
@@ -29,15 +30,19 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     private final WebClient userWebClient;
     @Qualifier("productWebClient")
     private final WebClient productWebClient;
+    @Qualifier("paymentWebClient")
+    private final WebClient paymentWebClient;
 
     public TransactionAdapter(TransactionRepository transactionRepository,
                               ITransactionEntityMapper transactionEntityMapper,
                               @Qualifier("userWebClient") WebClient userWebClient,
-                              @Qualifier("productWebClient") WebClient productWebClient) {
+                              @Qualifier("productWebClient") WebClient productWebClient,
+                              @Qualifier("paymentWebClient") WebClient paymentWebClient) {
         this.transactionRepository = transactionRepository;
         this.transactionEntityMapper = transactionEntityMapper;
         this.userWebClient = userWebClient;
         this.productWebClient = productWebClient;
+        this.paymentWebClient = paymentWebClient;
     }
 
     @Override
@@ -77,6 +82,17 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .bodyValue(productTransactions)
                 .retrieve()
                 .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> sendPaymentToMicroservice(PaymentTransaction paymentTransaction) {
+        return paymentWebClient.post()
+                .uri("/payment/transaction")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentTransaction)
+                .retrieve()
                 .toBodilessEntity()
                 .then();
     }

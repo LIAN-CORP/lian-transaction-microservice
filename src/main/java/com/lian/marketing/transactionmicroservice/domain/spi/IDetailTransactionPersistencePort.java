@@ -9,4 +9,5 @@ public interface IDetailTransactionPersistencePort {
     Mono<Void> saveDetailTransaction(DetailTransaction detailTransaction);
     Mono<Double> getProductPriceById(UUID productId);
     Mono<Double> getProductBuyPriceById(UUID productId);
+    Mono<Double> findDetailTransactionsByTransactionId(UUID transactionId);
 }

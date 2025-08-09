@@ -22,7 +22,7 @@ public class TransactionBeanConfig {
 
     @Bean
     public ITransactionPersistencePort transactionPersistencePort() {
-        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient());
+        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient(), client.paymentWebClient());
     }
 
     @Bean

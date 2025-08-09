@@ -7,6 +7,7 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -51,5 +52,10 @@ public class DetailTransactionAdapter implements IDetailTransactionPersistencePo
                 .retrieve()
                 .bodyToMono(Double.class)
                 .doOnNext(price -> log.info("Product price: {}", price));
+    }
+
+    @Override
+    public Mono<Double> findDetailTransactionsByTransactionId(UUID transactionId) {
+        return detailTransactionRepository.findTotalUnitPriceByTransactionId(transactionId);
     }
 }

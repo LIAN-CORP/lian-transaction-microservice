@@ -1,5 +1,6 @@
 package com.lian.marketing.transactionmicroservice.domain.spi;
 
+import com.lian.marketing.transactionmicroservice.domain.model.PaymentTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import reactor.core.publisher.Mono;
@@ -12,4 +13,5 @@ public interface ITransactionPersistencePort {
     Mono<Boolean> userExists(UUID id);
     Mono<Void> discountProductStock(List<ProductTransaction> productTransactions);
     Mono<Void> addProductStock(List<ProductTransaction> productTransactions);
+    Mono<Void> sendPaymentToMicroservice(PaymentTransaction paymentTransaction);
 }
