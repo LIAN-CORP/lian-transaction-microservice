@@ -4,7 +4,9 @@ import com.lian.marketing.transactionmicroservice.domain.model.CompleteTransacti
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 public interface ITransactionServicePort {
-    Mono<Void> createTransaction(Transaction transaction);
+    Mono<UUID> createTransaction(Transaction transaction);
     Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction);
 }

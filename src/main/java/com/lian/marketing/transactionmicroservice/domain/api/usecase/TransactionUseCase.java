@@ -1,12 +1,11 @@
 package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
+import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
-import com.lian.marketing.transactionmicroservice.domain.model.CompleteTransaction;
-import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
-import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import com.lian.marketing.transactionmicroservice.domain.model.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +22,11 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     private final ITransactionPersistencePort transactionPersistencePort;
     private final IClientServicePort clientServicePort;
+    private final IDetailTransactionServicePort detailTransactionServicePort;
 
 
     @Override
-    public Mono<Void> createTransaction(Transaction transaction) {
+    public Mono<UUID> createTransaction(Transaction transaction) {
         String phone = DomainUtils.transformPhoneNumber(transaction.getClient().getPhone());
         transaction.getClient().setPhone(phone);
         return transactionPersistencePort.userExists(transaction.getUserId())
@@ -47,11 +47,60 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     @Override
     public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction) {
-        return this.discountProductStock(completeTransaction.getProducts())
-                .then(this.createTransaction(completeTransaction.getTransaction()));
+        String type = completeTransaction.getTransaction().getTypeMovement().name();
+        return switch (type) {
+            case GeneralConstants.SELL_TRANSACTION -> processSellTransaction(completeTransaction);
+            case GeneralConstants.BUY_TRANSACTION -> processBuyTransaction(completeTransaction);
+            default -> Mono.empty();
+        };
+    }
+
+    private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {
+        return discountProductStock(completeTransaction.getProducts())
+                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .flatMap(transactionId ->
+                    createDetailAndPayment(completeTransaction, transactionId)
+                );
+    }
+
+    private Mono<Void> processBuyTransaction(CompleteTransaction completeTransaction) {
+        return addProductStock(completeTransaction.getProducts())
+                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
+                                new DetailTransaction(null, null, null, transactionId, null),
+                                completeTransaction.getProducts(),
+                                completeTransaction.getTransaction().getTypeMovement().name()
+                        )
+                );
+    }
+
+    private Mono<Void> createDetailAndPayment(CompleteTransaction completeTransaction, UUID transactionId) {
+        return detailTransactionServicePort.createDetailTransaction(
+                new DetailTransaction(null,
+                        null,
+                        null,
+                        transactionId,
+                        null),
+                completeTransaction.getProducts(),
+                completeTransaction.getTransaction().getTypeMovement().name()
+        )
+        .then(detailTransactionServicePort.getTotalAmountByTransactionId(transactionId))
+        .flatMap(amount -> {
+            PaymentTransaction payment = new PaymentTransaction();
+            payment.setAmount(amount.intValue());
+            payment.setTransactionId(transactionId);
+            payment.setPaymentMethod("CASH");
+            payment.setClientId(completeTransaction.getTransaction().getClient().getId());
+            payment.setDebtId(null);
+            return transactionPersistencePort.sendPaymentToMicroservice(payment);
+        });
     }
 
     private Mono<Void> discountProductStock(List<ProductTransaction> productTransactions) {
         return transactionPersistencePort.discountProductStock(productTransactions);
+    }
+
+    private Mono<Void> addProductStock(List<ProductTransaction> productTransactions) {
+        return transactionPersistencePort.addProductStock(productTransactions);
     }
 }

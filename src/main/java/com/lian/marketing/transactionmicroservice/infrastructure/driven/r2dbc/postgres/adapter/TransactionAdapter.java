@@ -3,9 +3,11 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.p
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
 import com.lian.marketing.transactionmicroservice.domain.model.ExistsResponse;
+import com.lian.marketing.transactionmicroservice.domain.model.PaymentTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TransactionEntity;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -28,22 +30,26 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     private final WebClient userWebClient;
     @Qualifier("productWebClient")
     private final WebClient productWebClient;
+    @Qualifier("paymentWebClient")
+    private final WebClient paymentWebClient;
 
     public TransactionAdapter(TransactionRepository transactionRepository,
                               ITransactionEntityMapper transactionEntityMapper,
                               @Qualifier("userWebClient") WebClient userWebClient,
-                              @Qualifier("productWebClient") WebClient productWebClient) {
+                              @Qualifier("productWebClient") WebClient productWebClient,
+                              @Qualifier("paymentWebClient") WebClient paymentWebClient) {
         this.transactionRepository = transactionRepository;
         this.transactionEntityMapper = transactionEntityMapper;
         this.userWebClient = userWebClient;
         this.productWebClient = productWebClient;
+        this.paymentWebClient = paymentWebClient;
     }
 
     @Override
-    public Mono<Void> saveTransaction(Transaction transaction) {
+    public Mono<UUID> saveTransaction(Transaction transaction) {
         return transactionRepository.save(transactionEntityMapper.toEntity(transaction))
                 .doOnNext(t -> log.info(GeneralConstants.TRANSACTION_SAVED_SFL4J, t.getId()))
-                .then();
+                .map(TransactionEntity::getId);
     }
 
     @Override
@@ -64,6 +70,29 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .bodyValue(productTransactions)
                 .retrieve()
                 .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> addProductStock(List<ProductTransaction> productTransactions) {
+        return productWebClient.post()
+                .uri("/product/stock/add")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productTransactions)
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> sendPaymentToMicroservice(PaymentTransaction paymentTransaction) {
+        return paymentWebClient.post()
+                .uri("/payment/transaction")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentTransaction)
+                .retrieve()
                 .toBodilessEntity()
                 .then();
     }

@@ -11,4 +11,9 @@ public class GeneralConstants {
     public static final String TYPE_MOVEMENT_NOT_VALID = "Type movement '%s' not valid";
     public static final String CLIENT_PHONE_IS_NOT_VALID = "Client phone '%s' is not valid";
     public static final String PRODUCT_NOT_FOUND = "Product not found";
+
+    //Transaction Constants
+    public static final String SELL_TRANSACTION = "VENTA";
+    public static final String BUY_TRANSACTION = "COMPRA";
+    public static final String CREDIT_TRANSACTION = "CREDITO";
 }

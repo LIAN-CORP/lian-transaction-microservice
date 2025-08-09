@@ -18,14 +18,15 @@ public class TransactionBeanConfig {
     private final TransactionRepository transactionRepository;
     private final WebClientConfig client;
     private final ClientBeanConfiguration clientBeanConfiguration;
+    private final DetailTransactionBeanConfig detailTransactionBeanConfig;
 
     @Bean
     public ITransactionPersistencePort transactionPersistencePort() {
-        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient());
+        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient(), client.paymentWebClient());
     }
 
     @Bean
     public ITransactionServicePort transactionServicePort() {
-        return new TransactionUseCase(transactionPersistencePort(), clientBeanConfiguration.clientServicePort());
+        return new TransactionUseCase(transactionPersistencePort(), clientBeanConfiguration.clientServicePort(), detailTransactionBeanConfig.detailTransactionServicePort());
     }
 }
