@@ -1,5 +1,6 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.exceptionhandler;
 
+import com.lian.marketing.transactionmicroservice.domain.exception.DebtException;
 import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
 import com.lian.marketing.transactionmicroservice.domain.exception.TypeMovementNotValidException;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
@@ -21,7 +22,8 @@ public class TransactionControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "USER_DO_NOT_EXISTS"
                 )));
     }
 
@@ -32,7 +34,8 @@ public class TransactionControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "TYPE_MOVEMENT_NOT_VALID"
                 )));
     }
 
@@ -43,7 +46,20 @@ public class TransactionControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "PRODUCT_NOT_FOUND"
+                )));
+    }
+
+    @ExceptionHandler(DebtException.class)
+    public Mono<ResponseEntity<ExceptionResponse>> handleDebtException(DebtException e) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.toString(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage(),
+                        LocalDateTime.now(),
+                        "DEBT_EXCEPTION"
                 )));
     }
 

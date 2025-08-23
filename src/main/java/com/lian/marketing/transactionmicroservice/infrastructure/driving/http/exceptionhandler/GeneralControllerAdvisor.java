@@ -21,7 +21,8 @@ public class GeneralControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "METHOD_ARGUMENT_NOT_VALID"
                 )));
     }
 
@@ -32,7 +33,8 @@ public class GeneralControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "SERVER_WEB_INPUT_EXCEPTION"
                 )));
     }
 
@@ -43,7 +45,8 @@ public class GeneralControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "CLIENT_PHONE_IS_NOT_VALID"
                 )));
     }
 
