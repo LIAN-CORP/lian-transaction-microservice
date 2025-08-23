@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +52,7 @@ public class TransactionUseCase implements ITransactionServicePort {
         return switch (type) {
             case GeneralConstants.SELL_TRANSACTION -> processSellTransaction(completeTransaction);
             case GeneralConstants.BUY_TRANSACTION -> processBuyTransaction(completeTransaction);
+            case GeneralConstants.CREDIT_TRANSACTION -> processCreditTransaction(completeTransaction);
             default -> Mono.empty();
         };
     }
@@ -72,6 +74,33 @@ public class TransactionUseCase implements ITransactionServicePort {
                                 completeTransaction.getTransaction().getTypeMovement().name()
                         )
                 );
+    }
+
+    private Mono<Void> processCreditTransaction(CompleteTransaction completeTransaction) {
+        return discountProductStock(completeTransaction.getProducts())
+                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .flatMap(transactionId ->
+                        createDetailAndDebt(completeTransaction, transactionId)
+                );
+    }
+
+    private Mono<Void> createDetailAndDebt(CompleteTransaction completeTransaction, UUID transactionId){
+        return detailTransactionServicePort.createDetailTransaction(
+            new DetailTransaction(null,
+                null,
+                null,
+                transactionId,
+                null),
+                completeTransaction.getProducts(),
+                completeTransaction.getTransaction().getTypeMovement().name()
+            )
+            .then(detailTransactionServicePort.getTotalAmountByTransactionId(transactionId))
+            .flatMap(amount -> transactionPersistencePort.sendCreditToMicroservice(
+                        new CreditTransaction(
+                                BigDecimal.valueOf(amount),
+                                completeTransaction.getTransaction().getClient().getId()
+                        )
+                ));
     }
 
     private Mono<Void> createDetailAndPayment(CompleteTransaction completeTransaction, UUID transactionId) {
