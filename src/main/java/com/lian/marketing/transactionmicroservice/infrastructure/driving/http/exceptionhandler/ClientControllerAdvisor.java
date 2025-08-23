@@ -18,7 +18,8 @@ public class ClientControllerAdvisor {
                         HttpStatus.BAD_REQUEST.toString(),
                         HttpStatus.BAD_REQUEST.value(),
                         e.getMessage(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        "CLIENT_PHONE_ALREADY_EXISTS"
                 )));
     }
 }

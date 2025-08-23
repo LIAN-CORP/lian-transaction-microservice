@@ -1,11 +1,9 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.adapter;
 
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.DebtException;
 import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
-import com.lian.marketing.transactionmicroservice.domain.model.ExistsResponse;
-import com.lian.marketing.transactionmicroservice.domain.model.PaymentTransaction;
-import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
-import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import com.lian.marketing.transactionmicroservice.domain.model.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TransactionEntity;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
@@ -93,6 +91,18 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentTransaction)
                 .retrieve()
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> sendCreditToMicroservice(CreditTransaction creditTransaction) {
+        return paymentWebClient.post()
+                .uri("/debt")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(creditTransaction)
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals, response -> Mono.error(new DebtException(GeneralConstants.DEBT_EXCEPTION)))
                 .toBodilessEntity()
                 .then();
     }

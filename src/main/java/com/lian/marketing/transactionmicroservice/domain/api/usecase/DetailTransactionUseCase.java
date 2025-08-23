@@ -31,7 +31,7 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
                     newDetailTransaction.setProductId(product.getId());
                     newDetailTransaction.setQuantity(product.getQuantity());
 
-                    if(GeneralConstants.SELL_TRANSACTION.equals(typeMovement)){ //VENTA
+                    if(GeneralConstants.SELL_TRANSACTION.equals(typeMovement) || GeneralConstants.CREDIT_TRANSACTION.equals(typeMovement)){ //VENTA
                         return detailTransactionPersistencePort.getProductPriceById(product.getId())
                             .flatMap(price -> {
                                 newDetailTransaction.setUnitPrice(price);
@@ -47,7 +47,7 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
                                 });
                     }
 
-                    return Mono.empty(); //TODO: Terminar para fiado
+                    return Mono.empty();
                 })
                 .then();
     }
