@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ClientHandler {
@@ -15,5 +17,9 @@ public class ClientHandler {
 
     public Mono<Void> saveClient(CreateClientRequest create) {
         return clientServicePort.saveClient(clientMapper.toModel(create));
+    }
+
+    public Mono<Boolean> userExistsById(UUID id){
+        return clientServicePort.existsById(id);
     }
 }
