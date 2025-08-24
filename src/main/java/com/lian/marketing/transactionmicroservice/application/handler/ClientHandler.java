@@ -22,4 +22,8 @@ public class ClientHandler {
     public Mono<Boolean> userExistsById(UUID id){
         return clientServicePort.existsById(id);
     }
+
+    public Mono<String> findClientNameById(UUID id){
+        return clientServicePort.findClientNameById(id);
+    }
 }

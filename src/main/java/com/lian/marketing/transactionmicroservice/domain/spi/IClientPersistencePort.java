@@ -10,4 +10,5 @@ public interface IClientPersistencePort {
     Mono<Client> findClientByPhone(String phone);
     Mono<Boolean> userExists(UUID id);
     Mono<UUID> findIdByPhone(String phone);
+    Mono<String> findClientNameById(UUID id);
 }

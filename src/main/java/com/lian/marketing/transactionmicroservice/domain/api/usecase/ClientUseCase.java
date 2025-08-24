@@ -57,4 +57,9 @@ public class ClientUseCase implements IClientServicePort {
         return clientPersistencePort.userExists(id);
     }
 
+    @Override
+    public Mono<String> findClientNameById(UUID id) {
+        return clientPersistencePort.findClientNameById(id);
+    }
+
 }

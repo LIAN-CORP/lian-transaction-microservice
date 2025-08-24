@@ -37,4 +37,9 @@ public class ClientAdapter implements IClientPersistencePort {
     public Mono<UUID> findIdByPhone(String phone) {
         return clientRepository.findIdByPhone(phone);
     }
+
+    @Override
+    public Mono<String> findClientNameById(UUID id) {
+        return clientRepository.findClientNameById(id);
+    }
 }

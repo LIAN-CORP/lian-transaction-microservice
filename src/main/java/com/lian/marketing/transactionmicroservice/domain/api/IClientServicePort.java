@@ -11,4 +11,5 @@ public interface IClientServicePort {
     Mono<UUID> findIdByPhone(String phone);
     Mono<UUID> saveClientAndGetId(Client client);
     Mono<Boolean> existsById(UUID id);
+    Mono<String> findClientNameById(UUID id);
 }

@@ -29,4 +29,11 @@ public class ClientController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/name/{id}")
+    public Mono<ResponseEntity<String>> getClientNameById(@PathVariable("id") UUID id) {
+        return clientHandler.findClientNameById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
