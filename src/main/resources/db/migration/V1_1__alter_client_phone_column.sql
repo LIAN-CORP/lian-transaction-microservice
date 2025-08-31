@@ -1,0 +1,3 @@
+ALTER TABLE public.Client ALTER COLUMN phone TYPE VARCHAR(15);
+ALTER TABLE public.Client ALTER COLUMN phone SET NOT NULL;
+ALTER TABLE public.Client ADD CONSTRAINT phone_unique UNIQUE (phone);

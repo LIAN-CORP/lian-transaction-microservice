@@ -38,6 +38,3 @@ out/
 
 ### .ENV ###
 .env
-
-### DB MIGRATIONS ###
-/src/main/resources/db/*

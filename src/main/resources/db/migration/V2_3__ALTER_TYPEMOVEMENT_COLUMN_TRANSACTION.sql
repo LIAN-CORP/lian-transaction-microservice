@@ -1,0 +1,1 @@
+ALTER TABLE transactions ALTER COLUMN type_movement TYPE varchar(255);
