@@ -11,7 +11,7 @@ import com.lian.marketing.transactionmicroservice.domain.constants.TransactionRe
 import com.lian.marketing.transactionmicroservice.domain.exception.ErrorCreatingExcelReportException;
 import com.lian.marketing.transactionmicroservice.domain.model.DebtTransactionExcel;
 import com.lian.marketing.transactionmicroservice.domain.model.DetailTransaction;
-import com.lian.marketing.transactionmicroservice.domain.model.ExcelReport;
+import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import org.dhatim.fastexcel.Worksheet;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

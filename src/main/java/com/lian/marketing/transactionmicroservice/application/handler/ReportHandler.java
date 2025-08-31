@@ -1,10 +1,9 @@
 package com.lian.marketing.transactionmicroservice.application.handler;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IWorkbookServicePort;
-import com.lian.marketing.transactionmicroservice.domain.model.ExcelReport;
+import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 

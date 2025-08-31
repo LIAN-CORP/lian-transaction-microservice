@@ -1,4 +1,4 @@
-package com.lian.marketing.transactionmicroservice.domain.model;
+package com.lian.marketing.transactionmicroservice.domain.model.report;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

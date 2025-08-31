@@ -1,4 +1,4 @@
-package com.lian.marketing.transactionmicroservice.domain.model;
+package com.lian.marketing.transactionmicroservice.domain.model.report;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter @Getter
-public class TransactionExcel {
+public class TransactionReport {
     private String transactionDate;
 }

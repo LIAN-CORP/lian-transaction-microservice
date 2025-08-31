@@ -3,7 +3,7 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.c
 import com.lian.marketing.transactionmicroservice.application.dto.request.CompleteCreateTransactionRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.ReportHandler;
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
-import com.lian.marketing.transactionmicroservice.domain.model.ExcelReport;
+import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;

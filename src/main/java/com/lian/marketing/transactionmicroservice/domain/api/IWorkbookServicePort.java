@@ -1,8 +1,6 @@
 package com.lian.marketing.transactionmicroservice.domain.api;
 
-import com.lian.marketing.transactionmicroservice.domain.model.ExcelReport;
-import org.dhatim.fastexcel.Workbook;
-import org.dhatim.fastexcel.Worksheet;
+import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 
 import java.time.LocalDate;
 
