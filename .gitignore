@@ -39,5 +39,3 @@ out/
 ### .ENV ###
 .env
 
-### FLYWAY ###
-src/main/resources/db/migration/V4_1__CREATE_DBLINK_EXTENSION.sql
