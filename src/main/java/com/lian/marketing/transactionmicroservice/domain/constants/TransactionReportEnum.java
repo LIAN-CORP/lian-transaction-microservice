@@ -4,8 +4,7 @@ public enum TransactionReportEnum {
 
     ID("ID"),
     TYPE_MOVEMENT("TIPO DE MOVIMIENTO"),
-    DATE("FECHA"),
-    CLIENT("CLIENTE");
+    DATE("FECHA");
 
     private String columnName;
 

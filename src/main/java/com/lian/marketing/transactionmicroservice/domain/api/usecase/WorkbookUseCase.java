@@ -1,18 +1,16 @@
 package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
-import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
-import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
-import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.IWorkbookServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.DebtReportEnum;
 import com.lian.marketing.transactionmicroservice.domain.constants.DetailTransactionReportEnum;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.constants.TransactionReportEnum;
 import com.lian.marketing.transactionmicroservice.domain.exception.ErrorCreatingExcelReportException;
-import com.lian.marketing.transactionmicroservice.domain.model.DebtTransactionExcel;
-import com.lian.marketing.transactionmicroservice.domain.model.DetailTransaction;
+import com.lian.marketing.transactionmicroservice.domain.model.report.DebtReport;
+import com.lian.marketing.transactionmicroservice.domain.model.report.DetailTransactionReport;
 import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
-import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import com.lian.marketing.transactionmicroservice.domain.model.report.TransactionReport;
+import com.lian.marketing.transactionmicroservice.domain.spi.IWorkbookPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
@@ -29,9 +27,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class WorkbookUseCase implements IWorkbookServicePort {
 
-    private final ITransactionServicePort transactionServicePort;
-    private final IDetailTransactionServicePort detailTransactionServicePort;
-    private final IClientServicePort clientServicePort;
+    private final IWorkbookPersistencePort workbookPersistencePort;
 
     @Override
     public ExcelReport generateWorkbook(LocalDate start, LocalDate end) {
@@ -70,30 +66,25 @@ public class WorkbookUseCase implements IWorkbookServicePort {
         }
 
         //DATA
-        transactionServicePort.findAllTransactionsByDateRange(start, end).collectList()
+        workbookPersistencePort.findTransactionReportsByDate(start, end).collectList()
                 .subscribe(transactions -> {
                     int i = 0;
-                    for(Transaction t : transactions){
-                        ws.value(i, 0, t.getId().toString());
-                        ws.value(i, 1, t.getTypeMovement().name());
-                        ws.value(i, 2, t.getTransactionDate().toString());
-                        ws.value(i, 3, t.getClient().getName());
-                        i++;
-                        //SEARCH FOR DETAIL TRANSACTIONS
-                        detailTransactionServicePort.findAllDetailTransactionsByTransactionId(transactions.get(i).getId())
-                                .collectList()
-                                .subscribe(detail -> {
-                                    int i2 = 0;
-                                    for(DetailTransaction dt : detail){
-                                        wsDetail.value(i2, 0, dt.getId().toString());
-                                        wsDetail.value(i2, 1, dt.getUnitPrice().toString());
-                                        wsDetail.value(i2, 2, dt.getQuantity().toString());
-                                        wsDetail.value(i2, 4, String.valueOf(dt.getUnitPrice() * dt.getQuantity()));
-                                        wsDetail.value(i2, 5, dt.getTransactionId().toString());
-                                        wsDetail.value(i2, 6, dt.getProductId().toString());
-                                        i2++;
-                                    }
-                                });
+                    int j = 0;
+                    for(TransactionReport t : transactions){
+                        ws.value(i, 0, t.getTransactionId());
+                        ws.value(i, 1, t.getTypeMovement());
+                        ws.value(i, 2, t.getTransactionDate());
+                        for(DetailTransactionReport d : t.getDetailTransactionReports()){
+                            wsDetail.value(j, 0, d.getDetailTransactionId());
+                            wsDetail.value(j, 1, d.getClientName());
+                            wsDetail.value(j, 2, d.getClientPhone());
+                            wsDetail.value(j, 3, d.getProductName());
+                            wsDetail.value(j, 4, d.getUnitPrice());
+                            wsDetail.value(j, 5, d.getQuantity());
+                            wsDetail.value(j, 6, d.getTotalPrice());
+                            wsDetail.value(j, 7, t.getTransactionId());
+                            j++;
+                        }
                     }
                 });
     }
@@ -104,20 +95,21 @@ public class WorkbookUseCase implements IWorkbookServicePort {
             ws.value(0,i, DebtReportEnum.values()[i].getColumnName());
         }
         //DATA
-        transactionServicePort.findAllDebtsByDateRange(start, end).collectList()
-                .subscribe(debts -> {
-                    int i = 0;
-                    for(DebtTransactionExcel debt : debts){
-                        ws.value(i, 0, debt.getId().toString());
-                        ws.value(i, 1, clientServicePort.findClientNameById(debt.getClientId()).toString());
-                        ws.value(i, 2, debt.getTotalAmount().toString());
-                        ws.value(i, 3, debt.getRemainingAmount().toString());
-                        ws.value(i, 4, debt.getStatus());
-                        ws.value(i, 5, debt.getCreatedAt().toString());
-                        ws.value(i, 6, debt.getUpdatedAt().toString());
-                        i++;
-                    }
-                });
+        workbookPersistencePort.findDebtReportsByDate(start, end)
+          .collectList()
+          .subscribe(debts -> {
+              int i = 0;
+              for(DebtReport debt : debts){
+                  ws.value(i, 0, debt.getDebtId());
+                  ws.value(i, 1, debt.getClientName());
+                  ws.value(i, 2, debt.getTotalAmount());
+                  ws.value(i, 3, debt.getTotalPaid());
+                  ws.value(i, 4, debt.getStatus());
+                  ws.value(i, 5, debt.getCreatedAt());
+                  ws.value(i, 6, debt.getUpdatedAt());
+                  i++;
+              }
+          });
     }
 
 }
