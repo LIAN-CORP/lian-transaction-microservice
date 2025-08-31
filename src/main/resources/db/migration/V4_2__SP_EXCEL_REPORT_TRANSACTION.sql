@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION SP_TO_EXCEL_REPORT(date start_date, date end_date)
+CREATE OR REPLACE FUNCTION SP_TO_EXCEL_REPORT(start_date DATE, end_date DATE)
 returns table (
     transaction_id UUID,
     client_name VARCHAR,
@@ -14,14 +14,19 @@ returns table (
 ) as
 $$
     BEGIN
-        PERFORM dblink_connect('conn_payment', 'server_payment_remote');
-        PERFORM dblink_connect('conn_stock', 'server_stock_remote');
+        -- VALIDATE IF STOCK CONNECTION EXISTS
+        IF NOT
+            ('conn_stock' = ANY(dblink_get_connections()))
+        THEN
+            PERFORM dblink_connect('conn_stock', 'server_stock_remote');
+        END IF;
+
         RETURN QUERY
         SELECT
             t.id as transaction_id,
             c.name as client_name,
             c.phone as client_phone,
-            t.type_movenemt as type_movement,
+            t.type_movement as type_movement,
             t.transaction_date as transaction_date,
             dt.id as detail_transaction_id,
             dt.unit_price as unit_price,
@@ -34,9 +39,11 @@ $$
         INNER JOIN detail_transaction dt on t.id = dt.transaction_id
         INNER JOIN (
             SELECT *
-            FROM dblink('conn_stock', format('SELECT id, name FROM product WHERE id ''%s''', dt.product_id))
+            FROM dblink('conn_stock', 'SELECT id, name FROM product')
             AS s(product_id uuid, name VARCHAR)
         ) s ON s.product_id = dt.product_id
-        WHERE t.transaction_date BETWEEN start_date AND end_date;
+        WHERE t.transaction_date BETWEEN start_date AND end_date
+        ORDER BY t.transaction_date ASC;
+
     END;
 $$ language plpgsql;
