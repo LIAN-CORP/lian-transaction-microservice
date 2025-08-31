@@ -13,4 +13,8 @@ public interface ITransactionEntityMapper {
     )
     @Mapping(target = "typeMovement", expression = "java( transaction.getTypeMovement().name())")
     TransactionEntity toEntity(Transaction transaction);
+
+    @Mapping(target = "client.id", expression = "java(transactionEntity.getClientId())")
+    @Mapping(target = "typeMovement", expression = "java(type_movement.valueOf(transactionEntity.getTypeMovement()))")
+    Transaction toModel(TransactionEntity transactionEntity);
 }

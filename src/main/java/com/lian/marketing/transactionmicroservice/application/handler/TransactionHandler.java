@@ -5,9 +5,11 @@ import com.lian.marketing.transactionmicroservice.application.mapper.ICompleteTr
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TransactionHandler {
     private final ICompleteTransactionMapper transactionMapper;

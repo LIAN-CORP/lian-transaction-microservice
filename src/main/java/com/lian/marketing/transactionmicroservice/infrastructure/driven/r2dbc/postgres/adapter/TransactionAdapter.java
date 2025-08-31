@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -105,6 +107,20 @@ public class TransactionAdapter implements ITransactionPersistencePort {
                 .onStatus(HttpStatus.BAD_REQUEST::equals, response -> Mono.error(new DebtException(GeneralConstants.DEBT_EXCEPTION)))
                 .toBodilessEntity()
                 .then();
+    }
+
+    @Override
+    public Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end) {
+        return transactionRepository.findAllByTransactionDateBetween(end, start).map(transactionEntityMapper::toModel);
+    }
+
+    @Override
+    public Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end) {
+        return paymentWebClient.get()
+                .uri("/debt/excel?start={start}&end={end}", start, end)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(DebtTransactionExcel.class);
     }
 
 }

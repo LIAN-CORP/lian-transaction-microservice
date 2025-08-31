@@ -58,4 +58,9 @@ public class DetailTransactionAdapter implements IDetailTransactionPersistencePo
     public Mono<Double> findDetailTransactionsByTransactionId(UUID transactionId) {
         return detailTransactionRepository.findTotalUnitPriceByTransactionId(transactionId);
     }
+
+    @Override
+    public Flux<DetailTransaction> findAllDetailTransactionsByTransactionId(UUID transactionId) {
+        return detailTransactionRepository.findByTransactionId(transactionId).map(detailTransactionEntityMapper::toModelFromEntity);
+    }
 }

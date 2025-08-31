@@ -57,6 +57,11 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
         return detailTransactionPersistencePort.findDetailTransactionsByTransactionId(transactionId);
     }
 
+    @Override
+    public Flux<DetailTransaction> findAllDetailTransactionsByTransactionId(UUID transactionId) {
+        return detailTransactionPersistencePort.findAllDetailTransactionsByTransactionId(transactionId);
+    }
+
     private List<ProductTransaction> mergeRepeatedProducts(List<ProductTransaction> products) {
         return new ArrayList<>(products.stream().collect(Collectors.toMap(
                 ProductTransaction::getId,
