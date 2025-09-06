@@ -56,7 +56,7 @@ public class WorkbookRepository {
       )
       .flatMap(r -> r.map((row, metadata) -> {
         DebtReport report = new DebtReport();
-        report.setDebtId(row.get("debt_id", String.class));
+        report.setDebtId(row.get("id", String.class));
         report.setClientName(row.get("client_name", String.class));
         report.setTotalAmount(row.get("total_amount", String.class));
         report.setTotalPaid(row.get("remaining_amount", String.class));

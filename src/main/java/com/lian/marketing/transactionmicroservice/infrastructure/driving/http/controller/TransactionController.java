@@ -34,8 +34,8 @@ public class TransactionController {
     public Mono<ResponseEntity<Flux<DataBuffer>>> downloadExcel(@RequestParam LocalDate start, @RequestParam LocalDate end) {
         return reportHandler.generateReport(start, end)
           .map(excel -> ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + excel.getFilename())
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + excel.getFilename())
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             .body(excel.getContent())
           );
     }
