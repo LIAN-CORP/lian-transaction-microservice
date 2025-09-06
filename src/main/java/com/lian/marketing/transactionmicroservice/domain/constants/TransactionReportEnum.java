@@ -4,7 +4,13 @@ public enum TransactionReportEnum {
 
     ID("ID"),
     TYPE_MOVEMENT("TIPO DE MOVIMIENTO"),
-    DATE("FECHA");
+    DATE("FECHA"),
+    CLIENT("CLIENTE"),
+    CLIENT_PHONE("CELULAR CLIENTE"),
+    PRODUCT("PRODUCTO"),
+    UNIT_PRICE("PRECIO UNIDAD"),
+    QUANTITY("CANTIDAD"),
+    TOTAL_PRICE("TOTAL");
 
     private String columnName;
 

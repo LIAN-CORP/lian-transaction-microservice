@@ -3,7 +3,6 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.c
 import com.lian.marketing.transactionmicroservice.application.dto.request.CompleteCreateTransactionRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.ReportHandler;
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
-import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -33,13 +32,12 @@ public class TransactionController {
 
     @GetMapping(value = "/download/report", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Flux<DataBuffer>>> downloadExcel(@RequestParam LocalDate start, @RequestParam LocalDate end) {
-        ExcelReport excel = reportHandler.generateReport(start, end);
-        return Mono.just(
-                ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + excel.getFilename())
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .body(excel.getContent())
-        );
+        return reportHandler.generateReport(start, end)
+          .map(excel -> ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + excel.getFilename())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(excel.getContent())
+          );
     }
 
 }

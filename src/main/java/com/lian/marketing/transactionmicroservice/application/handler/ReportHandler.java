@@ -4,6 +4,7 @@ import com.lian.marketing.transactionmicroservice.domain.api.IWorkbookServicePor
 import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 public class ReportHandler {
     private final IWorkbookServicePort workbookServicePort;
 
-    public ExcelReport generateReport(LocalDate start, LocalDate end) {
+    public Mono<ExcelReport> generateReport(LocalDate start, LocalDate end) {
         return workbookServicePort.generateWorkbook(start, end);
     }
 }

@@ -6,11 +6,9 @@ import com.lian.marketing.transactionmicroservice.domain.constants.DetailTransac
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.constants.TransactionReportEnum;
 import com.lian.marketing.transactionmicroservice.domain.exception.ErrorCreatingExcelReportException;
-import com.lian.marketing.transactionmicroservice.domain.model.report.DebtReport;
-import com.lian.marketing.transactionmicroservice.domain.model.report.DetailTransactionReport;
-import com.lian.marketing.transactionmicroservice.domain.model.report.ExcelReport;
-import com.lian.marketing.transactionmicroservice.domain.model.report.TransactionReport;
+import com.lian.marketing.transactionmicroservice.domain.model.report.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.IWorkbookPersistencePort;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TempTransactionReportEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
@@ -73,28 +71,18 @@ public class WorkbookUseCase implements IWorkbookServicePort {
           .index()
           .flatMap(tuple -> {
               long i = tuple.getT1() + 1;
-              TransactionReport t = tuple.getT2();
+              TempTransactionReportEntity t = tuple.getT2();
 
               ws.value((int) i, 0, t.getTransactionId());
               ws.value((int) i, 1, t.getTypeMovement());
               ws.value((int) i, 2, t.getTransactionDate());
-
-              return Flux.fromIterable(t.getDetailTransactionReports())
-                .index()
-                .doOnNext(detailTuple -> {
-                    long j = detailTuple.getT1() + 1;
-                    DetailTransactionReport d = detailTuple.getT2();
-
-                    wsDetail.value((int) j, 0, d.getDetailTransactionId());
-                    wsDetail.value((int) j, 1, d.getClientName());
-                    wsDetail.value((int) j, 2, d.getClientPhone());
-                    wsDetail.value((int) j, 3, d.getProductName());
-                    wsDetail.value((int) j, 4, d.getUnitPrice());
-                    wsDetail.value((int) j, 5, d.getQuantity());
-                    wsDetail.value((int) j, 6, d.getTotalPrice());
-                    wsDetail.value((int) j, 7, t.getTransactionId());
-                })
-                .then();
+              ws.value((int) i, 3, t.getClientName());
+              ws.value((int) i, 4, t.getClientPhone());
+              ws.value((int) i, 5, t.getProductName());
+              ws.value((int) i, 6, t.getUnitPrice());
+              ws.value((int) i, 7, t.getQuantity());
+              ws.value((int) i, 8, t.getTotalPrice());
+              return Mono.empty();
           })
           .then();
     }
