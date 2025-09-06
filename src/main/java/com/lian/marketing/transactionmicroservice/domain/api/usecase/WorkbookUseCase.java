@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Slf4j
@@ -62,8 +63,7 @@ public class WorkbookUseCase implements IWorkbookServicePort {
     // HEADERS
     for (int i = 0; i < TransactionReportEnum.values().length; i++) {
       ws.value(0, i, TransactionReportEnum.values()[i].getColumnName());
-      ws.style(0, i).bold().fillColor("#224263").set(); // BACKGROUND
-      ws.style(0, i).fontColor("#FFFFFF").set(); // FONT COLOR
+      ws.style(0, i).bold().fillColor("224263").fontColor("FFFFFF").set(); // BACKGROUND & FONT COLOR
     }
     // DATA
     return workbookPersistencePort.findTransactionReportsByDate(start, end)
@@ -79,12 +79,12 @@ public class WorkbookUseCase implements IWorkbookServicePort {
         ws.value((int) i, 4, t.getClientPhone());
         ws.value((int) i, 5, t.getProductName());
 
-        ws.value((int) i, 6, t.getUnitPrice());
+        ws.value((int) i, 6, new BigDecimal(t.getUnitPrice()));
         ws.style((int) i, 6).format(format_number).set();
 
         ws.value((int) i, 7, t.getQuantity());
 
-        ws.value((int) i, 8, t.getTotalPrice());
+        ws.value((int) i, 8, new BigDecimal(t.getTotalPrice()));
         ws.style((int) i, 8).format(format_number).set();
 
         return Mono.empty();
@@ -97,8 +97,7 @@ public class WorkbookUseCase implements IWorkbookServicePort {
     // HEADERS
     for (int i = 0; i < DebtReportEnum.values().length; i++) {
       ws.value(0, i, DebtReportEnum.values()[i].getColumnName());
-      ws.style(0, i).bold().fillColor("#224263").set(); // BACKGROUND
-      ws.style(0, i).fontColor("#FFFFFF").set(); // FONT COLOR
+      ws.style(0, i).bold().fillColor("224263").fontColor("FFFFFF").set(); // BACKGROUND & FONT COLOR
     }
 
     // DATA
@@ -111,16 +110,16 @@ public class WorkbookUseCase implements IWorkbookServicePort {
         ws.value((int) row, 0, debt.getDebtId());
         ws.value((int) row, 1, debt.getClientName());
 
-        ws.value((int) row, 2, debt.getTotalAmount());
+        ws.value((int) row, 2, new BigDecimal(debt.getTotalAmount()));
         ws.style((int) row, 2).format(format_number).set();
 
-        ws.value((int) row, 3, debt.getTotalPaid());
+        ws.value((int) row, 3, new BigDecimal(debt.getTotalPaid()));
         ws.style((int) row, 3).format(format_number).set();
 
 
         ws.value((int) row, 4, debt.getStatus());
-        String color = "PAID".equals(debt.getStatus()) ? "#7DDA58" : "#E4080A";
-        ws.style((int) row, 4).fontColor(color).set();
+        String color = "PAID".equals(debt.getStatus()) ? "7DDA58" : "E4080A";
+        ws.style((int) row, 4).fontColor(color).bold().set();
 
         ws.value((int) row, 5, debt.getCreatedAt());
         ws.value((int) row, 6, debt.getUpdatedAt());
