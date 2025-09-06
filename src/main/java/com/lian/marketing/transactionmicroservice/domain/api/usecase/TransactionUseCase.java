@@ -10,6 +10,7 @@ import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersist
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -55,6 +56,16 @@ public class TransactionUseCase implements ITransactionServicePort {
             case GeneralConstants.CREDIT_TRANSACTION -> processCreditTransaction(completeTransaction);
             default -> Mono.empty();
         };
+    }
+
+    @Override
+    public Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end) {
+        return transactionPersistencePort.findAllTransactionsByDateRange(start, end);
+    }
+
+    @Override
+    public Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end) {
+        return null;
     }
 
     private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {

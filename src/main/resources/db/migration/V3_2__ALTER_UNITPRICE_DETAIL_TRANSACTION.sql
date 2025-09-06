@@ -1,0 +1,1 @@
+ALTER TABLE detail_transaction ALTER COLUMN unit_price TYPE NUMERIC(10,2);

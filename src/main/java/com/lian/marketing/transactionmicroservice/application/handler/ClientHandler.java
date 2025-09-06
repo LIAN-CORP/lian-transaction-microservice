@@ -5,11 +5,13 @@ import com.lian.marketing.transactionmicroservice.application.mapper.IClientMapp
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ClientHandler {
     private final IClientServicePort clientServicePort;

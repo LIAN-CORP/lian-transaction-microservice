@@ -1,15 +1,19 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.controller;
 
 import com.lian.marketing.transactionmicroservice.application.dto.request.CompleteCreateTransactionRequest;
+import com.lian.marketing.transactionmicroservice.application.handler.ReportHandler;
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/transaction")
@@ -17,12 +21,23 @@ import reactor.core.publisher.Mono;
 public class TransactionController {
 
     private final TransactionHandler transactionHandler;
+    private final ReportHandler reportHandler;
 
     @PostMapping
     public Mono<ResponseEntity<Void>> saveTransaction(
             @Valid @RequestBody CompleteCreateTransactionRequest request
             ) {
         return transactionHandler.saveTransaction(request).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
+    }
+
+    @GetMapping(value = "/download/report", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<Flux<DataBuffer>>> downloadExcel(@RequestParam LocalDate start, @RequestParam LocalDate end) {
+        return reportHandler.generateReport(start, end)
+          .map(excel -> ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + excel.getFilename())
+            .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(excel.getContent())
+          );
     }
 
 }
