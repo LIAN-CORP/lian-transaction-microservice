@@ -3,9 +3,11 @@ package com.lian.marketing.transactionmicroservice.application.handler;
 import com.lian.marketing.transactionmicroservice.application.dto.request.CreateClientRequest;
 import com.lian.marketing.transactionmicroservice.application.mapper.IClientMapper;
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
+import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -27,5 +29,9 @@ public class ClientHandler {
 
     public Mono<String> findClientNameById(UUID id){
         return clientServicePort.findClientNameById(id);
+    }
+
+    public Flux<Client> findAllByName(String name){
+        return clientServicePort.findAllByName(name);
     }
 }

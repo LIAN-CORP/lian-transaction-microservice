@@ -6,6 +6,7 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -41,5 +42,10 @@ public class ClientAdapter implements IClientPersistencePort {
     @Override
     public Mono<String> findClientNameById(UUID id) {
         return clientRepository.findClientNameById(id);
+    }
+
+    @Override
+    public Flux<Client> findAllByName(String name) {
+        return clientRepository.findAllByName(name).map(clientEntityMapper::toModel);
     }
 }

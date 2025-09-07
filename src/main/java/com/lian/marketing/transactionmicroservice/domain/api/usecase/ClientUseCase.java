@@ -1,14 +1,13 @@
 package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
-import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneAlreadyExistsException;
-import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import com.lian.marketing.transactionmicroservice.domain.spi.IClientPersistencePort;
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -60,6 +59,11 @@ public class ClientUseCase implements IClientServicePort {
     @Override
     public Mono<String> findClientNameById(UUID id) {
         return clientPersistencePort.findClientNameById(id);
+    }
+
+    @Override
+    public Flux<Client> findAllByName(String name) {
+        return clientPersistencePort.findAllByName(name);
     }
 
 }
