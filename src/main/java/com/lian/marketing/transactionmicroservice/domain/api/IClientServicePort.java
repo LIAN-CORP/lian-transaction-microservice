@@ -1,6 +1,7 @@
 package com.lian.marketing.transactionmicroservice.domain.api;
 
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -12,4 +13,5 @@ public interface IClientServicePort {
     Mono<UUID> saveClientAndGetId(Client client);
     Mono<Boolean> existsById(UUID id);
     Mono<String> findClientNameById(UUID id);
+    Flux<Client> findAllByName(String name);
 }

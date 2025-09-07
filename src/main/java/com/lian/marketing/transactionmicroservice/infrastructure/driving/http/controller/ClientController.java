@@ -2,12 +2,14 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.c
 
 import com.lian.marketing.transactionmicroservice.application.dto.request.CreateClientRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.ClientHandler;
+import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,6 +36,14 @@ public class ClientController {
         return clientHandler.findClientNameById(id)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public Mono<ResponseEntity<List<Client>>> getClientsByName(@RequestParam(value = "name", required = false) String name) {
+        return clientHandler.findAllByName(name)
+          .collectList()
+          .map(ResponseEntity::ok)
+          .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }
