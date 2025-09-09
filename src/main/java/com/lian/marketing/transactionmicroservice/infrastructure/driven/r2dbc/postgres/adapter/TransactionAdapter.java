@@ -114,13 +114,4 @@ public class TransactionAdapter implements ITransactionPersistencePort {
         return transactionRepository.findAllByTransactionDateBetween(end, start).map(transactionEntityMapper::toModel);
     }
 
-    @Override
-    public Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end) {
-        return paymentWebClient.get()
-                .uri("/debt/excel?start={start}&end={end}", start, end)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(DebtTransactionExcel.class);
-    }
-
 }

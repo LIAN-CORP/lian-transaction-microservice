@@ -129,7 +129,7 @@ public class TransactionUseCase implements ITransactionServicePort {
             PaymentTransaction payment = new PaymentTransaction();
             payment.setAmount(amount.intValue());
             payment.setTransactionId(transactionId);
-            payment.setPaymentMethod("CASH");
+            payment.setPaymentMethod(completeTransaction.getPaymentMethod());
             payment.setClientId(completeTransaction.getTransaction().getClient().getId());
             payment.setDebtId(null);
             return transactionPersistencePort.sendPaymentToMicroservice(payment);

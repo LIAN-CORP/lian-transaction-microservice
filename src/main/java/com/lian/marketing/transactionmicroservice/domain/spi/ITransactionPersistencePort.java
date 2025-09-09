@@ -16,5 +16,4 @@ public interface ITransactionPersistencePort {
     Mono<Void> sendPaymentToMicroservice(PaymentTransaction paymentTransaction);
     Mono<Void> sendCreditToMicroservice(CreditTransaction creditTransaction);
     Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end);
-    Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end);
 }

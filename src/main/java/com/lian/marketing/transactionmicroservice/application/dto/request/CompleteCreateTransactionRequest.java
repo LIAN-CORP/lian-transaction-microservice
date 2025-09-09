@@ -7,6 +7,8 @@ import java.util.List;
 public record CompleteCreateTransactionRequest(
         //@Valid
         CreateTransactionRequest transaction,
+        @NotEmpty(message = ConstantDto.PAYMENT_METHOD_MUST_BE_NOT_EMPTY)
+        String paymentMethod,
         @NotEmpty(message = ConstantDto.PRODUCT_LIST_MUST_BE_NOT_EMPTY)
         List<ProductTransactionRequest> products
 ) {
