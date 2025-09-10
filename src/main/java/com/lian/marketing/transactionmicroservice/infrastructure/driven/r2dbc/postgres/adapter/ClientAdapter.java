@@ -48,4 +48,9 @@ public class ClientAdapter implements IClientPersistencePort {
     public Flux<Client> findAllByName(String name) {
         return clientRepository.findAllByName(name).map(clientEntityMapper::toModel);
     }
+
+    @Override
+    public Mono<Client> findClientById(UUID id) {
+        return clientRepository.findById(id).map(clientEntityMapper::toModel);
+    }
 }

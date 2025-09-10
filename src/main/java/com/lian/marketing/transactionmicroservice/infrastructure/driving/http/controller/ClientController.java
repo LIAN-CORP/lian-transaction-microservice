@@ -1,6 +1,7 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.controller;
 
 import com.lian.marketing.transactionmicroservice.application.dto.request.CreateClientRequest;
+import com.lian.marketing.transactionmicroservice.application.dto.request.UpdateClientRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.ClientHandler;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import jakarta.validation.Valid;
@@ -44,6 +45,11 @@ public class ClientController {
           .collectList()
           .map(ResponseEntity::ok)
           .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping
+    public Mono<ResponseEntity<Void>> updateClient(@Valid @RequestBody UpdateClientRequest client) {
+        return clientHandler.updateClient(client).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
     }
 
 }

@@ -14,4 +14,5 @@ public interface IClientServicePort {
     Mono<Boolean> existsById(UUID id);
     Mono<String> findClientNameById(UUID id);
     Flux<Client> findAllByName(String name);
+    Mono<Void> updateClient(Client client);
 }
