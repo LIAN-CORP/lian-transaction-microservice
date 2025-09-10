@@ -1,9 +1,6 @@
 package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.exceptionhandler;
 
-import com.lian.marketing.transactionmicroservice.domain.exception.DebtException;
-import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
-import com.lian.marketing.transactionmicroservice.domain.exception.TypeMovementNotValidException;
-import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
+import com.lian.marketing.transactionmicroservice.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -60,6 +57,18 @@ public class TransactionControllerAdvisor {
                         e.getMessage(),
                         LocalDateTime.now(),
                         "DEBT_EXCEPTION"
+                )));
+    }
+
+    @ExceptionHandler(PaymentMethodIsRequiredException.class)
+  public Mono<ResponseEntity<ExceptionResponse>> handlePaymentMethodIsRequiredException(PaymentMethodIsRequiredException e) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(
+                        HttpStatus.BAD_REQUEST.toString(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage(),
+                        LocalDateTime.now(),
+                        "PAYMENT_METHOD_IS_REQUIRED"
                 )));
     }
 

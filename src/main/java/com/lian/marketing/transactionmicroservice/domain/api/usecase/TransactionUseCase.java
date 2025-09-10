@@ -4,6 +4,7 @@ import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.PaymentMethodIsRequiredException;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.model.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
@@ -69,6 +70,9 @@ public class TransactionUseCase implements ITransactionServicePort {
     }
 
     private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {
+        if(completeTransaction.getPaymentMethod() == null){
+            return Mono.error(new PaymentMethodIsRequiredException(GeneralConstants.PAYMENT_METHOD_FOR_SELL_TRANSACTION_IS_REQUIRED));
+        }
         return discountProductStock(completeTransaction.getProducts())
                 .then(this.createTransaction(completeTransaction.getTransaction()))
                 .flatMap(transactionId ->
