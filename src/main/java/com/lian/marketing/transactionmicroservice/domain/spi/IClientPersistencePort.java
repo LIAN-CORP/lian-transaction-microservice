@@ -13,4 +13,5 @@ public interface IClientPersistencePort {
     Mono<UUID> findIdByPhone(String phone);
     Mono<String> findClientNameById(UUID id);
     Flux<Client> findAllByName(String name);
+    Mono<Client> findClientById(UUID id);
 }

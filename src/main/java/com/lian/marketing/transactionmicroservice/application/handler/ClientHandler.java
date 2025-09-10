@@ -1,6 +1,7 @@
 package com.lian.marketing.transactionmicroservice.application.handler;
 
 import com.lian.marketing.transactionmicroservice.application.dto.request.CreateClientRequest;
+import com.lian.marketing.transactionmicroservice.application.dto.request.UpdateClientRequest;
 import com.lian.marketing.transactionmicroservice.application.mapper.IClientMapper;
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
@@ -33,5 +34,9 @@ public class ClientHandler {
 
     public Flux<Client> findAllByName(String name){
         return clientServicePort.findAllByName(name);
+    }
+
+    public Mono<Void> updateClient(UpdateClientRequest client){
+        return clientServicePort.updateClient(clientMapper.toModelFromUpdate(client));
     }
 }

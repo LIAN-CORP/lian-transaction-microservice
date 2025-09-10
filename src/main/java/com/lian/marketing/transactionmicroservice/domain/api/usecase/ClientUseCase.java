@@ -1,7 +1,10 @@
 package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
+import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneAlreadyExistsException;
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import com.lian.marketing.transactionmicroservice.domain.spi.IClientPersistencePort;
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
@@ -64,6 +67,22 @@ public class ClientUseCase implements IClientServicePort {
     @Override
     public Flux<Client> findAllByName(String name) {
         return clientPersistencePort.findAllByName(name);
+    }
+
+    @Override
+    public Mono<Void> updateClient(Client client) {
+        if(client.getPhone().length() != 13){
+            return Mono.error(new ClientPhoneNumberIsNotValid(String.format(GeneralConstants.CLIENT_PHONE_IS_NOT_VALID, client.getPhone())));
+        }
+        return clientPersistencePort.findClientById(client.getId())
+          .switchIfEmpty(Mono.error(new ClientDoNotExistsException(GeneralConstants.CLIENT_DO_NOT_EXISTS)))
+          .flatMap(c -> {
+              c.setName(client.getName());
+              if(!client.getPhone().equals(c.getPhone())){
+                c.setPhone(client.getPhone());
+              }
+              return clientPersistencePort.saveClient(c).then();
+          });
     }
 
 }

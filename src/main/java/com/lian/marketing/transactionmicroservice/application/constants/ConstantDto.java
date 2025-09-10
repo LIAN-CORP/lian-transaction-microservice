@@ -10,6 +10,7 @@ public class ConstantDto {
     public static final int MIN_CLIENT_PHONE_LENGTH = 10;
     public static final String CLIENT_PHONE_MESSAGE = "Phone must be 10 digits max";
     public static final String CLIENT_PHONE_REGEX = "^\\+?\\d+$";
+    public static final String CLIENT_ID_MUST_BE_NOT_EMPTY = "Client id must be not empty";
 
     // TRANSACTION
     public static final String TRANSACTION_TYPE_MOVEMENT_MUST_BE_NOT_EMPTY = "Transaction type movement must be not empty";

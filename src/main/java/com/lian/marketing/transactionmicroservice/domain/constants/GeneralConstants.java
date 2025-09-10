@@ -13,6 +13,7 @@ public class GeneralConstants {
     public static final String PRODUCT_NOT_FOUND = "Product not found";
     public static final String DEBT_EXCEPTION = "Debt exception";
     public static final String PAYMENT_METHOD_FOR_SELL_TRANSACTION_IS_REQUIRED = "Payment method for sell transaction is required";
+    public static final String CLIENT_DO_NOT_EXISTS = "Client do not exists";
 
     //Transaction Constants
     public static final String SELL_TRANSACTION = "VENTA";
