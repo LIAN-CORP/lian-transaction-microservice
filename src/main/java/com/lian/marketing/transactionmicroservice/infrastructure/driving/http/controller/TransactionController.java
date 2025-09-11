@@ -3,6 +3,8 @@ package com.lian.marketing.transactionmicroservice.infrastructure.driving.http.c
 import com.lian.marketing.transactionmicroservice.application.dto.request.CompleteCreateTransactionRequest;
 import com.lian.marketing.transactionmicroservice.application.handler.ReportHandler;
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
+import com.lian.marketing.transactionmicroservice.domain.model.ContentPage;
+import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -38,6 +40,17 @@ public class TransactionController {
             .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             .body(excel.getContent())
           );
+    }
+
+    @GetMapping
+    public Mono<ResponseEntity<ContentPage<Transaction>>> findAllTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end
+    ) {
+        return transactionHandler.findAllTransactions(page, size, start, end)
+                .map(transactionsPage -> ResponseEntity.ok().body(transactionsPage));
     }
 
 }

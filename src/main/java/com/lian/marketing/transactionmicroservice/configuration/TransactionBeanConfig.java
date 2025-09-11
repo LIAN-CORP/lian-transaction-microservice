@@ -5,6 +5,7 @@ import com.lian.marketing.transactionmicroservice.domain.api.usecase.Transaction
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.adapter.TransactionAdapter;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ManualRepository;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,10 +20,11 @@ public class TransactionBeanConfig {
     private final WebClientConfig client;
     private final ClientBeanConfiguration clientBeanConfiguration;
     private final DetailTransactionBeanConfig detailTransactionBeanConfig;
+    private final ManualRepository manualRepository;
 
     @Bean
     public ITransactionPersistencePort transactionPersistencePort() {
-        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient(), client.paymentWebClient());
+        return new TransactionAdapter(transactionRepository, transactionEntityMapper, client.userWebClient(), client.stockWebClient(), client.paymentWebClient(), manualRepository);
     }
 
     @Bean
