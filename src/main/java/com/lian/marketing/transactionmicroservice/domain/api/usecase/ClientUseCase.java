@@ -74,6 +74,9 @@ public class ClientUseCase implements IClientServicePort {
         if(client.getPhone().length() != 13){
             return Mono.error(new ClientPhoneNumberIsNotValid(String.format(GeneralConstants.CLIENT_PHONE_IS_NOT_VALID, client.getPhone())));
         }
+        if("+000000000000".equals(client.getPhone())){
+            return Mono.error(new ClientPhoneNumberIsNotValid(GeneralConstants.GENERIC_CLIENT_PHONE_IS_NOT_EDITABLE));
+        }
         return clientPersistencePort.findClientById(client.getId())
           .switchIfEmpty(Mono.error(new ClientDoNotExistsException(GeneralConstants.CLIENT_DO_NOT_EXISTS)))
           .flatMap(c -> {

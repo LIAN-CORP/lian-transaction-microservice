@@ -10,6 +10,7 @@ public class GeneralConstants {
     public static final String TRANSACTION_SAVED_SFL4J = "Transaction saved with id {}";
     public static final String TYPE_MOVEMENT_NOT_VALID = "Type movement '%s' not valid";
     public static final String CLIENT_PHONE_IS_NOT_VALID = "Client phone '%s' is not valid";
+    public static final String GENERIC_CLIENT_PHONE_IS_NOT_EDITABLE = "Client phone is not editable";
     public static final String PRODUCT_NOT_FOUND = "Product not found";
     public static final String DEBT_EXCEPTION = "Debt exception";
     public static final String PAYMENT_METHOD_FOR_SELL_TRANSACTION_IS_REQUIRED = "Payment method for sell transaction is required";
