@@ -7,9 +7,14 @@ import com.lian.marketing.transactionmicroservice.domain.model.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TransactionEntity;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ManualRepository;
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,17 +37,20 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     private final WebClient productWebClient;
     @Qualifier("paymentWebClient")
     private final WebClient paymentWebClient;
+    private final ManualRepository manualRepository;
 
     public TransactionAdapter(TransactionRepository transactionRepository,
                               ITransactionEntityMapper transactionEntityMapper,
                               @Qualifier("userWebClient") WebClient userWebClient,
                               @Qualifier("productWebClient") WebClient productWebClient,
-                              @Qualifier("paymentWebClient") WebClient paymentWebClient) {
+                              @Qualifier("paymentWebClient") WebClient paymentWebClient,
+                              ManualRepository manualRepository) {
         this.transactionRepository = transactionRepository;
         this.transactionEntityMapper = transactionEntityMapper;
         this.userWebClient = userWebClient;
         this.productWebClient = productWebClient;
         this.paymentWebClient = paymentWebClient;
+        this.manualRepository = manualRepository;
     }
 
     @Override
@@ -112,6 +120,56 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     @Override
     public Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end) {
         return transactionRepository.findAllByTransactionDateBetween(end, start).map(transactionEntityMapper::toModel);
+    }
+
+    @Override
+    public Mono<ContentPage<Transaction>> findAllTransactionsPageable(int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Flux<Transaction> data = manualRepository.findAllTransactions()
+          .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+          .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+          .take(pageable.getPageSize());
+
+        Mono<Long> total = transactionRepository.count();
+
+        return getContentPageMono(page, size, data, total);
+    }
+
+    private Mono<ContentPage<Transaction>> getContentPageMono(int page, int size, Flux<Transaction> data, Mono<Long> total) {
+        return data
+          .collectList()
+          .zipWith(total)
+          .map(tuple -> {
+              List<Transaction> content = tuple.getT1();
+              long totalElements = tuple.getT2();
+              int totalPages = (int) Math.ceil((double) totalElements / (double) size);
+
+              ContentPage<Transaction> contentPage = new ContentPage<>();
+              contentPage.setTotalPage(totalPages);
+              contentPage.setTotalElements(totalElements);
+              contentPage.setPageNumber(page);
+              contentPage.setPageSize(size);
+              contentPage.setFirst(page == 0);
+              contentPage.setLast(page + 1 >= totalPages);
+              contentPage.setContent(content);
+
+              return contentPage;
+          });
+    }
+
+    @Override
+    public Mono<ContentPage<Transaction>> findAllTransactionsByDatePageable(int page, int size, LocalDate start, LocalDate end) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Flux<Transaction> data = manualRepository.findTransactionsByDate(start, end)
+          .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+          .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+          .take(pageable.getPageSize());
+
+        Mono<Long> total = transactionRepository.countByTransactionDateBetween(start, end);
+
+        return getContentPageMono(page, size, data, total);
     }
 
 }

@@ -11,11 +11,13 @@ import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersist
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.datetime.DateFormatter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,6 +69,17 @@ public class TransactionUseCase implements ITransactionServicePort {
     @Override
     public Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end) {
         return null;
+    }
+
+    @Override
+    public Mono<ContentPage<Transaction>> findAllTransactionsByDate(int page, int size, String start, String end) {
+
+        if(start != null && end != null){
+            LocalDate dateStart = LocalDate.parse(start);
+            LocalDate dateEnd = LocalDate.parse(end);
+            return transactionPersistencePort.findAllTransactionsByDatePageable(page, size, dateStart, dateEnd);
+        }
+        return transactionPersistencePort.findAllTransactionsPageable(page, size);
     }
 
     private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {
