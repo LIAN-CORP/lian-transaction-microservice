@@ -2,6 +2,7 @@ package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.model.CompleteDetailTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.DetailTransaction;
 import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
 import com.lian.marketing.transactionmicroservice.domain.spi.IDetailTransactionPersistencePort;
@@ -62,7 +63,12 @@ public class DetailTransactionUseCase implements IDetailTransactionServicePort {
         return detailTransactionPersistencePort.findAllDetailTransactionsByTransactionId(transactionId);
     }
 
-    private List<ProductTransaction> mergeRepeatedProducts(List<ProductTransaction> products) {
+  @Override
+  public Mono<List<CompleteDetailTransaction>> findDetailTransactionsByTransactionId(UUID transactionId) {
+    return detailTransactionPersistencePort.findFullDetailTransactionsByTransactionId(transactionId);
+  }
+
+  private List<ProductTransaction> mergeRepeatedProducts(List<ProductTransaction> products) {
         return new ArrayList<>(products.stream().collect(Collectors.toMap(
                 ProductTransaction::getId,
                 p -> new ProductTransaction(
