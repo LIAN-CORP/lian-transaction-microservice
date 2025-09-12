@@ -20,6 +20,7 @@ public class GeneralConstants {
     public static final String SELL_TRANSACTION = "VENTA";
     public static final String BUY_TRANSACTION = "COMPRA";
     public static final String CREDIT_TRANSACTION = "CREDITO";
+    public static final String TRANSACTION_NOT_FOUND = "Transaction not found";
 
     //Excel
     public static final String ERROR_CREATING_EXCEL_REPORT_SFL4J = "Error creating excel report {}";

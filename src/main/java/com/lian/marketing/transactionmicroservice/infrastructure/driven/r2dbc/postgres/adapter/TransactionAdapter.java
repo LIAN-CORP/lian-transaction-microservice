@@ -172,4 +172,24 @@ public class TransactionAdapter implements ITransactionPersistencePort {
         return getContentPageMono(page, size, data, total);
     }
 
+    @Override
+    public Mono<Void> deleteTransactionById(UUID id) {
+        return manualRepository.callSpDeleteTransaction(id);
+    }
+
+    @Override
+    public Mono<Void> deleteBuyTransactionById(UUID id) {
+        return manualRepository.callSpDeleteBuyTransaction(id);
+    }
+
+    @Override
+    public Mono<Boolean> transactionExists(UUID id) {
+        return transactionRepository.findById(id).hasElement();
+    }
+
+    @Override
+    public Mono<Boolean> isBuyTypeTransaction(UUID id) {
+        return transactionRepository.isBuyTypeTransaction(id);
+    }
+
 }

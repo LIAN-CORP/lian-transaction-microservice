@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/transaction")
@@ -53,4 +54,8 @@ public class TransactionController {
                 .map(transactionsPage -> ResponseEntity.ok().body(transactionsPage));
     }
 
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> deleteTransactionById(@PathVariable("id") UUID id) {
+        return transactionHandler.deleteTransactionById(id).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
+    }
 }

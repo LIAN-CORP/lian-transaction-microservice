@@ -18,4 +18,8 @@ public interface ITransactionPersistencePort {
     Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end);
     Mono<ContentPage<Transaction>> findAllTransactionsPageable(int page, int size);
     Mono<ContentPage<Transaction>> findAllTransactionsByDatePageable(int page, int size, LocalDate start, LocalDate end);
+    Mono<Void> deleteTransactionById(UUID id);
+    Mono<Void> deleteBuyTransactionById(UUID id);
+    Mono<Boolean> transactionExists(UUID id);
+    Mono<Boolean> isBuyTypeTransaction(UUID id);
 }

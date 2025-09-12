@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -23,5 +25,9 @@ public class TransactionHandler {
 
     public Mono<ContentPage<Transaction>> findAllTransactions(int page, int size, String start, String end) {
         return transactionServicePort.findAllTransactionsByDate(page, size, start, end);
+    }
+
+    public Mono<Void> deleteTransactionById(UUID id){
+        return transactionServicePort.deleteTransactionById(id);
     }
 }
