@@ -5,19 +5,18 @@ import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionS
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
 import com.lian.marketing.transactionmicroservice.domain.exception.PaymentMethodIsRequiredException;
+import com.lian.marketing.transactionmicroservice.domain.exception.TransactionDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.exception.UserDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.model.*;
 import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
 import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.datetime.DateFormatter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,6 +79,21 @@ public class TransactionUseCase implements ITransactionServicePort {
             return transactionPersistencePort.findAllTransactionsByDatePageable(page, size, dateStart, dateEnd);
         }
         return transactionPersistencePort.findAllTransactionsPageable(page, size);
+    }
+
+    @Override
+    public Mono<Void> deleteTransactionById(UUID id) {
+        return transactionPersistencePort.transactionExists(id).flatMap(r -> {
+            if(!r){
+                return Mono.error(new TransactionDoNotExistsException(GeneralConstants.TRANSACTION_NOT_FOUND));
+            }
+            return transactionPersistencePort.isBuyTypeTransaction(id).flatMap(t -> {
+                if(!t){
+                    return transactionPersistencePort.deleteTransactionById(id);
+                }
+                return transactionPersistencePort.deleteBuyTransactionById(id);
+            });
+        });
     }
 
     private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {

@@ -16,4 +16,5 @@ public interface ITransactionServicePort {
     Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end);
     Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end);
     Mono<ContentPage<Transaction>> findAllTransactionsByDate(int page, int size, String start, String end);
+    Mono<Void> deleteTransactionById(UUID id);
 }

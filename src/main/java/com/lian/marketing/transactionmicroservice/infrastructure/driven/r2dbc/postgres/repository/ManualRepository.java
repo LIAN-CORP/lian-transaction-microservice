@@ -68,4 +68,24 @@ public class ManualRepository {
       }))
       .collectList();
   }
+
+  public Mono<Void> callSpDeleteTransaction(UUID transactionId) {
+    return client.inConnection(connection ->
+      Mono.from(
+        connection.createStatement("CALL sp_delete_transaction($1)")
+        .bind("$1", transactionId)
+        .execute()
+      ).flatMap(r -> Mono.from(r.getRowsUpdated()))
+    ).then();
+  }
+
+  public Mono<Void> callSpDeleteBuyTransaction(UUID transactionId) {
+    return client.inConnection( connection ->
+      Mono.from(
+        connection.createStatement("CALL sp_delete_buy_transaction($1)")
+          .bind("$1", transactionId)
+          .execute()
+      ).flatMap(r -> Mono.from(r.getRowsUpdated()))
+    ).then();
+  }
 }
