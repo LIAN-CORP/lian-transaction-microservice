@@ -56,6 +56,6 @@ BEGIN
                                   AS s(product_id uuid, name VARCHAR)) s ON s.product_id = dt.product_id
     WHERE t.transaction_date BETWEEN start_date AND end_date
     ORDER BY t.transaction_date ASC;
-
+    PERFORM dblink_disconnect('stock_conn');
 END;
 $$;
