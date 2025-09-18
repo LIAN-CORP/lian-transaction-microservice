@@ -24,7 +24,7 @@ BEGIN
     --PERFORM dblink_disconnect('conn_stock');
     --PERFORM dblink_connect('conn_stock', 'server_stock_remote');
 
-    PERFORM dblink_connect_u('host=${host} port=${port} dbname=${db_stock} user=${user} password=${password}');
+    PERFORM dblink_connect_u('stock_conn','host=${host} port=${port} dbname=${db_stock} user=${user} password=${password}');
 
     -- VALIDATE IF STOCK CONNECTION EXISTS
     --IF NOT
@@ -52,10 +52,10 @@ BEGIN
              INNER JOIN client c ON t.client_id = c.id
              INNER JOIN detail_transaction dt on t.id = dt.transaction_id
              INNER JOIN (SELECT *
-                         FROM dblink('host=${host} port=${port} dbname=${db_stock} user=${user} password=${password}', 'SELECT id, name FROM product')
+                         FROM dblink('stock_conn', 'SELECT id, name FROM product')
                                   AS s(product_id uuid, name VARCHAR)) s ON s.product_id = dt.product_id
     WHERE t.transaction_date BETWEEN start_date AND end_date
     ORDER BY t.transaction_date ASC;
-
+    PERFORM dblink_disconnect('stock_conn');
 END;
 $$;

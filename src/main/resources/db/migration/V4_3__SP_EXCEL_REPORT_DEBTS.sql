@@ -15,7 +15,7 @@ LANGUAGE plpgsql AS
 $$
 BEGIN
 
-    PERFORM dblink_connect_u('host=${host} port=${port} dbname=${db_payment} user=${user} password=${password}');
+    PERFORM dblink_connect_u('payment_conn','host=${host} port=${port} dbname=${db_payment} user=${user} password=${password}');
 
     -- VALIDATE IF PAYMENT CONNECTION EXISTS
     --IF NOT
@@ -38,7 +38,7 @@ BEGIN
            debt.updated_at       as updated_at
     FROM client c
              INNER JOIN (SELECT *
-                         FROM dblink('host=${host} port=${port} dbname=${db_payment} user=${user} password=${password}',
+                         FROM dblink('payment_conn',
                                      'SELECT id, total_amount, remaining_amount, status, created_at, updated_at, client_id FROM debt WHERE created_at BETWEEN TO_TIMESTAMP(''' ||
                                      start_date || ''', ''YYYY-MM-DD'') AND TO_TIMESTAMP(''' || end_date ||
                                      ''', ''YYYY-MM-DD'')')
@@ -52,6 +52,6 @@ BEGIN
                                           client_id UUID
                                  )) debt ON debt.client_id = c.id
     ORDER BY debt.created_at ASC;
-
+    PERFORM dblink_disconnect('payment_conn');
 END;
 $$;
