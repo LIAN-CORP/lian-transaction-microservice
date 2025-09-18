@@ -140,7 +140,8 @@ public class TransactionUseCase implements ITransactionServicePort {
             .flatMap(amount -> transactionPersistencePort.sendCreditToMicroservice(
                         new CreditTransaction(
                                 BigDecimal.valueOf(amount),
-                                completeTransaction.getTransaction().getClient().getId()
+                                completeTransaction.getTransaction().getClient().getId(),
+                                transactionId
                         )
                 ));
     }

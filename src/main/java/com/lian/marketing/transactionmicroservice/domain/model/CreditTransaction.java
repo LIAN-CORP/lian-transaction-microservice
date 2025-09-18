@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record CreditTransaction(
         BigDecimal totalAmount,
-        UUID clientId
+        UUID clientId,
+        UUID transactionId
         ) {
 }
