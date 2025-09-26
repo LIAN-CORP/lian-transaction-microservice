@@ -21,25 +21,91 @@ public class ManualRepository {
     this.client = databaseClient;
   }
 
-  public Flux<Transaction> findAllTransactions() {
-    String sql = "SELECT t.*, c.name, c.phone FROM transactions t INNER JOIN client c ON t.client_id = c.id";
-    return client.sql(sql).flatMap(r -> r.map((row, meta) -> {
-      Transaction transaction = new Transaction();
-      transaction.setId(row.get("id", UUID.class));
-      transaction.setTransactionDate(row.get("transaction_date", LocalDate.class));
-      transaction.setTypeMovement(type_movement.valueOf(row.get("type_movement", String.class)));
-      transaction.setUserId(row.get("user_id", UUID.class));
-      Client client = new Client();
-      client.setName(row.get("name", String.class));
-      client.setPhone(row.get("phone", String.class));
-      transaction.setClient(client);
-      return transaction;
+  public Flux<Transaction> findAllTransactions(UUID clientId, String typeMovement) {
+    String sql = "SELECT t.*, c.name, c.phone " +
+      "FROM transactions t " +
+      "INNER JOIN client c ON t.client_id = c.id " +
+      "WHERE (:clientId IS NULL OR t.client_id = CAST(:clientId AS UUID)) " +
+      "AND LOWER(t.type_movement) LIKE LOWER(CONCAT('%', :typeMovement, '%'))";
+
+    DatabaseClient.GenericExecuteSpec spec = client.sql(sql);
+    if(clientId != null) {
+      spec = spec.bind("clientId", clientId);
+    }else {
+      spec = spec.bindNull("clientId", UUID.class);
+    }
+    spec = spec.bind("typeMovement", typeMovement == null ? "" : typeMovement);
+
+    return spec
+      .flatMap(r -> r.map((row, meta) -> {
+        Transaction transaction = new Transaction();
+        transaction.setId(row.get("id", UUID.class));
+        transaction.setTransactionDate(row.get("transaction_date", LocalDate.class));
+        transaction.setTypeMovement(type_movement.valueOf(row.get("type_movement", String.class)));
+        transaction.setUserId(row.get("user_id", UUID.class));
+        Client client = new Client();
+        client.setName(row.get("name", String.class));
+        client.setPhone(row.get("phone", String.class));
+        transaction.setClient(client);
+        return transaction;
     }));
   }
 
-  public Flux<Transaction> findTransactionsByDate(LocalDate startDate, LocalDate endDate) {
-    String sql = "SELECT t.*, c.name, c.phone FROM transactions t INNER JOIN client c ON t.client_id = c.id WHERE t.transaction_date BETWEEN :start AND :end";
-    return client.sql(sql).bind("start", startDate).bind("end", endDate)
+  public Mono<Long> countAllTransactions(UUID clientId, String typeMovement) {
+    String sql = "SELECT COUNT(*) FROM transactions t " +
+      "INNER JOIN client c ON t.client_id = c.id " +
+      "WHERE (:clientId IS NULL OR t.client_id = CAST(:clientId AS UUID)) " +
+      "AND LOWER(t.type_movement) LIKE LOWER(CONCAT('%', :typeMovement, '%'))";
+
+    DatabaseClient.GenericExecuteSpec spec = client.sql(sql);
+    if(clientId != null) {
+      spec = spec.bind("clientId", clientId);
+    }else {
+      spec = spec.bindNull("clientId", UUID.class);
+    }
+    spec = spec.bind("typeMovement", typeMovement == null ? "" : typeMovement);
+
+    return spec.map((row, meta) -> row.get(0, Long.class)).one();
+  }
+
+  public Mono<Long> countAllTransactionsByDate(LocalDate startDate, LocalDate endDate, UUID clientId, String typeMovement) {
+    String sql = "SELECT COUNT(*) FROM transactions t " +
+      "INNER JOIN client c ON t.client_id = c.id " +
+      "WHERE t.transaction_date BETWEEN :start AND :end " +
+      "AND (:clientId IS NULL OR t.client_id = CAST(:clientId AS UUID)) " +
+      "AND LOWER(t.type_movement) LIKE LOWER(CONCAT('%', :typeMovement, '%'))";
+
+    DatabaseClient.GenericExecuteSpec spec = client.sql(sql);
+    spec = spec.bind("start", startDate).bind("end", endDate);
+
+    if(clientId != null) {
+      spec = spec.bind("clientId", clientId);
+    }else {
+      spec = spec.bindNull("clientId", UUID.class);
+    }
+    spec = spec.bind("typeMovement", typeMovement == null ? "" : typeMovement);
+
+    return spec.map((row, meta) -> row.get(0, Long.class)).one();
+  }
+
+  public Flux<Transaction> findTransactionsByDate(LocalDate startDate, LocalDate endDate, UUID clientId, String typeMovement) {
+    String sql = "SELECT t.*, c.name, c.phone " +
+      "FROM transactions t " +
+      "INNER JOIN client c ON t.client_id = c.id " +
+      "WHERE t.transaction_date BETWEEN :start AND :end " +
+      "AND (:clientId IS NULL OR t.client_id = CAST(:clientId AS UUID)) " +
+      "AND LOWER(t.type_movement) LIKE LOWER(CONCAT('%', :typeMovement, '%'))";
+
+    DatabaseClient.GenericExecuteSpec spec = client.sql(sql);
+    spec = spec.bind("start", startDate).bind("end", endDate);
+    if(clientId != null) {
+      spec = spec.bind("clientId", clientId);
+    }else {
+      spec = spec.bindNull("clientId", UUID.class);
+    }
+    spec = spec.bind("typeMovement", typeMovement == null ? "" : typeMovement);
+
+    return spec
       .flatMap(r -> r.map((row, meta)-> {
         Transaction transaction = new Transaction();
         transaction.setId(row.get("id", UUID.class));

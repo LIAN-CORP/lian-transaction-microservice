@@ -123,15 +123,15 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     }
 
     @Override
-    public Mono<ContentPage<Transaction>> findAllTransactionsPageable(int page, int size) {
+    public Mono<ContentPage<Transaction>> findAllTransactionsPageable(int page, int size, UUID clientId, String type) {
         Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
         Pageable pageable = PageRequest.of(page, size, sort);
-        Flux<Transaction> data = manualRepository.findAllTransactions()
+        Flux<Transaction> data = manualRepository.findAllTransactions(clientId, type)
           .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
           .skip((long) pageable.getPageNumber() * pageable.getPageSize())
           .take(pageable.getPageSize());
 
-        Mono<Long> total = transactionRepository.count();
+        Mono<Long> total = manualRepository.countAllTransactions(clientId, type);
 
         return getContentPageMono(page, size, data, total);
     }
@@ -159,15 +159,15 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     }
 
     @Override
-    public Mono<ContentPage<Transaction>> findAllTransactionsByDatePageable(int page, int size, LocalDate start, LocalDate end) {
+    public Mono<ContentPage<Transaction>> findAllTransactionsByDatePageable(int page, int size, LocalDate start, LocalDate end, UUID clientId, String type) {
         Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
         Pageable pageable = PageRequest.of(page, size, sort);
-        Flux<Transaction> data = manualRepository.findTransactionsByDate(start, end)
+        Flux<Transaction> data = manualRepository.findTransactionsByDate(start, end, clientId, type)
           .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
           .skip((long) pageable.getPageNumber() * pageable.getPageSize())
           .take(pageable.getPageSize());
 
-        Mono<Long> total = transactionRepository.countByTransactionDateBetween(start, end);
+        Mono<Long> total = manualRepository.countAllTransactionsByDate(start, end, clientId, type);
 
         return getContentPageMono(page, size, data, total);
     }

@@ -48,9 +48,11 @@ public class TransactionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String start,
-            @RequestParam(required = false) String end
+            @RequestParam(required = false) String end,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) UUID clientId
     ) {
-        return transactionHandler.findAllTransactions(page, size, start, end)
+        return transactionHandler.findAllTransactions(page, size, start, end, clientId, type)
                 .map(transactionsPage -> ResponseEntity.ok().body(transactionsPage));
     }
 

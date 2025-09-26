@@ -23,8 +23,8 @@ public class TransactionHandler {
         return transactionServicePort.createCompleteTransaction(transactionMapper.toModelFromRequest(request));
     }
 
-    public Mono<ContentPage<Transaction>> findAllTransactions(int page, int size, String start, String end) {
-        return transactionServicePort.findAllTransactionsByDate(page, size, start, end);
+    public Mono<ContentPage<Transaction>> findAllTransactions(int page, int size, String start, String end, UUID clientId, String type) {
+        return transactionServicePort.findAllTransactionsByDate(page, size, start, end, clientId, type);
     }
 
     public Mono<Void> deleteTransactionById(UUID id){

@@ -71,14 +71,14 @@ public class TransactionUseCase implements ITransactionServicePort {
     }
 
     @Override
-    public Mono<ContentPage<Transaction>> findAllTransactionsByDate(int page, int size, String start, String end) {
+    public Mono<ContentPage<Transaction>> findAllTransactionsByDate(int page, int size, String start, String end, UUID clientId, String type) {
 
         if(start != null && end != null){
             LocalDate dateStart = LocalDate.parse(start);
             LocalDate dateEnd = LocalDate.parse(end);
-            return transactionPersistencePort.findAllTransactionsByDatePageable(page, size, dateStart, dateEnd);
+            return transactionPersistencePort.findAllTransactionsByDatePageable(page, size, dateStart, dateEnd, clientId, type);
         }
-        return transactionPersistencePort.findAllTransactionsPageable(page, size);
+        return transactionPersistencePort.findAllTransactionsPageable(page, size, clientId, type);
     }
 
     @Override
