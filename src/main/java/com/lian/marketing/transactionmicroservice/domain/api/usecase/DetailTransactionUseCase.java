@@ -1,0 +1,81 @@
+package com.lian.marketing.transactionmicroservice.domain.api.usecase;
+
+import com.lian.marketing.transactionmicroservice.domain.api.IDetailTransactionServicePort;
+import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.model.CompleteDetailTransaction;
+import com.lian.marketing.transactionmicroservice.domain.model.DetailTransaction;
+import com.lian.marketing.transactionmicroservice.domain.model.ProductTransaction;
+import com.lian.marketing.transactionmicroservice.domain.spi.IDetailTransactionPersistencePort;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Slf4j
+@RequiredArgsConstructor
+public class DetailTransactionUseCase implements IDetailTransactionServicePort {
+
+    private final IDetailTransactionPersistencePort detailTransactionPersistencePort;
+
+    @Override
+    public Mono<Void> createDetailTransaction(DetailTransaction detailTransaction, List<ProductTransaction> products, String typeMovement) {
+        products = mergeRepeatedProducts(products);
+        return Flux.fromIterable(products)
+                .flatMap(product -> {
+                    DetailTransaction newDetailTransaction = new DetailTransaction();
+                    newDetailTransaction.setTransactionId(detailTransaction.getTransactionId());
+                    newDetailTransaction.setProductId(product.getId());
+                    newDetailTransaction.setQuantity(product.getQuantity());
+
+                    if(GeneralConstants.SELL_TRANSACTION.equals(typeMovement) || GeneralConstants.CREDIT_TRANSACTION.equals(typeMovement)){ //VENTA
+                        return detailTransactionPersistencePort.getProductPriceById(product.getId())
+                            .flatMap(price -> {
+                                newDetailTransaction.setUnitPrice(price);
+                                return detailTransactionPersistencePort.saveDetailTransaction(newDetailTransaction);
+                            });
+                    }
+
+                    if(GeneralConstants.BUY_TRANSACTION.equals(typeMovement)) {
+                        return detailTransactionPersistencePort.getProductBuyPriceById(product.getId())
+                                .flatMap(price -> {
+                                    newDetailTransaction.setUnitPrice(price);
+                                    return detailTransactionPersistencePort.saveDetailTransaction(newDetailTransaction);
+                                });
+                    }
+
+                    return Mono.empty();
+                })
+                .then();
+    }
+
+    @Override
+    public Mono<Double> getTotalAmountByTransactionId(UUID transactionId) {
+        return detailTransactionPersistencePort.findDetailTransactionsByTransactionId(transactionId);
+    }
+
+    @Override
+    public Flux<DetailTransaction> findAllDetailTransactionsByTransactionId(UUID transactionId) {
+        return detailTransactionPersistencePort.findAllDetailTransactionsByTransactionId(transactionId);
+    }
+
+  @Override
+  public Mono<List<CompleteDetailTransaction>> findDetailTransactionsByTransactionId(UUID transactionId) {
+    return detailTransactionPersistencePort.findFullDetailTransactionsByTransactionId(transactionId);
+  }
+
+  private List<ProductTransaction> mergeRepeatedProducts(List<ProductTransaction> products) {
+        return new ArrayList<>(products.stream().collect(Collectors.toMap(
+                ProductTransaction::getId,
+                p -> new ProductTransaction(
+                        p.getId(),
+                        p.getQuantity()
+                ),
+                (p1, p2) -> new ProductTransaction(p1.getId(), p1.getQuantity() + p2.getQuantity())
+        )).values());
+    }
+}

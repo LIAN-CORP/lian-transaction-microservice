@@ -6,7 +6,10 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,13 +19,38 @@ public class ClientAdapter implements IClientPersistencePort {
     private final IClientEntityMapper clientEntityMapper;
 
     @Override
-    public Mono<Void> saveClient(Client client) {
+    public Mono<UUID> saveClient(Client client) {
         log.info("Saving client {}", client);
-        return clientRepository.save(clientEntityMapper.toEntity(client)).then();
+        return clientRepository.save(clientEntityMapper.toEntity(client)).flatMap(clientEntity -> Mono.just(clientEntity.getId()));
     }
 
     @Override
     public Mono<Client> findClientByPhone(String phone) {
         return clientRepository.findByPhone(phone).map(clientEntityMapper::toModel);
+    }
+
+    @Override
+    public Mono<Boolean> userExists(UUID id) {
+        return clientRepository.existsById(id);
+    }
+
+    @Override
+    public Mono<UUID> findIdByPhone(String phone) {
+        return clientRepository.findIdByPhone(phone);
+    }
+
+    @Override
+    public Mono<String> findClientNameById(UUID id) {
+        return clientRepository.findClientNameById(id);
+    }
+
+    @Override
+    public Flux<Client> findAllByName(String name) {
+        return clientRepository.findAllByName(name).map(clientEntityMapper::toModel);
+    }
+
+    @Override
+    public Mono<Client> findClientById(UUID id) {
+        return clientRepository.findById(id).map(clientEntityMapper::toModel);
     }
 }

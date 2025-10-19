@@ -2,11 +2,15 @@ package com.lian.marketing.transactionmicroservice.domain.api.usecase;
 
 import com.lian.marketing.transactionmicroservice.domain.api.IClientServicePort;
 import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientDoNotExistsException;
 import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneAlreadyExistsException;
+import com.lian.marketing.transactionmicroservice.domain.exception.ClientPhoneNumberIsNotValid;
 import com.lian.marketing.transactionmicroservice.domain.model.Client;
 import com.lian.marketing.transactionmicroservice.domain.spi.IClientPersistencePort;
+import com.lian.marketing.transactionmicroservice.domain.utils.DomainUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -19,20 +23,69 @@ public class ClientUseCase implements IClientServicePort {
 
     @Override
     public Mono<Void> saveClient(Client client) {
+        String phone = DomainUtils.transformPhoneNumber(client.getPhone());
+        client.setPhone(phone);
         return clientPersistencePort.findClientByPhone(client.getPhone())
                 .flatMap(existing -> {
                     log.warn("Client with phone {} already exists", client.getPhone());
                     return Mono.error(new ClientPhoneAlreadyExistsException("Phone number already exists"));
                 })
-                .switchIfEmpty(Mono.defer(() -> {
-                    if(client.getPhone().length() < 10) {
-                        client.setPhone(GeneralConstants.COLOMBIA_PREFIX + client.getPhone());
-                        log.info("Phone number has no prefix, adding prefix to +57 to {}", client.getPhone());
-                    }
-                    return clientPersistencePort.saveClient(client);
-                }))
+                .switchIfEmpty(clientPersistencePort.saveClient(client))
                 .then();
-
-
     }
+
+    @Override
+    public Mono<Boolean> existsByPhone(String phone) {
+        return clientPersistencePort.findClientByPhone(phone)
+                .map(client -> true)
+                .defaultIfEmpty(false)
+                .doOnNext(exists -> log.info("Client exists: {}", exists));
+    }
+
+    public Mono<UUID> findIdByPhone(String phone) {
+        return clientPersistencePort.findIdByPhone(phone);
+    }
+
+    @Override
+    public Mono<UUID> saveClientAndGetId(Client client) {
+        return Mono.defer(() -> {
+            client.setPhone(DomainUtils.transformPhoneNumber(client.getPhone()));
+            return clientPersistencePort.saveClient(client);
+        });
+    }
+
+    @Override
+    public Mono<Boolean> existsById(UUID id) {
+        return clientPersistencePort.userExists(id);
+    }
+
+    @Override
+    public Mono<String> findClientNameById(UUID id) {
+        return clientPersistencePort.findClientNameById(id);
+    }
+
+    @Override
+    public Flux<Client> findAllByName(String name) {
+        return clientPersistencePort.findAllByName(name);
+    }
+
+    @Override
+    public Mono<Void> updateClient(Client client) {
+        if(client.getPhone().length() != 13){
+            return Mono.error(new ClientPhoneNumberIsNotValid(String.format(GeneralConstants.CLIENT_PHONE_IS_NOT_VALID, client.getPhone())));
+        }
+        if("+000000000000".equals(client.getPhone())){
+            return Mono.error(new ClientPhoneNumberIsNotValid(GeneralConstants.GENERIC_CLIENT_PHONE_IS_NOT_EDITABLE));
+        }
+        return clientPersistencePort.findClientById(client.getId())
+          .switchIfEmpty(Mono.error(new ClientDoNotExistsException(GeneralConstants.CLIENT_DO_NOT_EXISTS)))
+          .flatMap(c -> {
+              c.setName(client.getName());
+              if(!client.getPhone().equals(c.getPhone())){
+                c.setPhone(client.getPhone());
+              }
+              return clientPersistencePort.saveClient(c).then();
+          });
+    }
+
 }

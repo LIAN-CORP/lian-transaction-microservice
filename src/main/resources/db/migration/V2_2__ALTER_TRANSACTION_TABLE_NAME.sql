@@ -1,0 +1,1 @@
+ALTER TABLE transaction RENAME TO transactions;

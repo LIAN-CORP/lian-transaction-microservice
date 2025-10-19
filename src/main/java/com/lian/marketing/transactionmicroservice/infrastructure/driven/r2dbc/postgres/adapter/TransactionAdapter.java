@@ -1,0 +1,195 @@
+package com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.adapter;
+
+import com.lian.marketing.transactionmicroservice.domain.constants.GeneralConstants;
+import com.lian.marketing.transactionmicroservice.domain.exception.DebtException;
+import com.lian.marketing.transactionmicroservice.domain.exception.ProductNotFoundException;
+import com.lian.marketing.transactionmicroservice.domain.model.*;
+import com.lian.marketing.transactionmicroservice.domain.spi.ITransactionPersistencePort;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.entity.TransactionEntity;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.mapper.ITransactionEntityMapper;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.ManualRepository;
+import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+@Slf4j
+public class TransactionAdapter implements ITransactionPersistencePort {
+
+    private final TransactionRepository transactionRepository;
+    private final ITransactionEntityMapper transactionEntityMapper;
+
+    @Qualifier("userWebClient")
+    private final WebClient userWebClient;
+    @Qualifier("productWebClient")
+    private final WebClient productWebClient;
+    @Qualifier("paymentWebClient")
+    private final WebClient paymentWebClient;
+    private final ManualRepository manualRepository;
+
+    public TransactionAdapter(TransactionRepository transactionRepository,
+                              ITransactionEntityMapper transactionEntityMapper,
+                              @Qualifier("userWebClient") WebClient userWebClient,
+                              @Qualifier("productWebClient") WebClient productWebClient,
+                              @Qualifier("paymentWebClient") WebClient paymentWebClient,
+                              ManualRepository manualRepository) {
+        this.transactionRepository = transactionRepository;
+        this.transactionEntityMapper = transactionEntityMapper;
+        this.userWebClient = userWebClient;
+        this.productWebClient = productWebClient;
+        this.paymentWebClient = paymentWebClient;
+        this.manualRepository = manualRepository;
+    }
+
+    @Override
+    public Mono<UUID> saveTransaction(Transaction transaction) {
+        return transactionRepository.save(transactionEntityMapper.toEntity(transaction))
+                .doOnNext(t -> log.info(GeneralConstants.TRANSACTION_SAVED_SFL4J, t.getId()))
+                .map(TransactionEntity::getId);
+    }
+
+    @Override
+    public Mono<Boolean> userExists(UUID id) {
+        return userWebClient.get()
+                .uri("/user/exists/{id}", id.toString())
+                .retrieve()
+                .bodyToMono(ExistsResponse.class)
+                .map(ExistsResponse::exists)
+                .doOnNext(exists -> log.info("User exists: {}", exists));
+    }
+
+    @Override
+    public Mono<Void> discountProductStock(List<ProductTransaction> productTransactions) {
+        return productWebClient.post()
+                .uri("/product/discount")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productTransactions)
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> addProductStock(List<ProductTransaction> productTransactions) {
+        return productWebClient.post()
+                .uri("/product/stock/add")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productTransactions)
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.error(new ProductNotFoundException(GeneralConstants.PRODUCT_NOT_FOUND)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> sendPaymentToMicroservice(PaymentTransaction paymentTransaction) {
+        return paymentWebClient.post()
+                .uri("/payment/transaction")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentTransaction)
+                .retrieve()
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Mono<Void> sendCreditToMicroservice(CreditTransaction creditTransaction) {
+        return paymentWebClient.post()
+                .uri("/debt")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(creditTransaction)
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals, response -> Mono.error(new DebtException(GeneralConstants.DEBT_EXCEPTION)))
+                .toBodilessEntity()
+                .then();
+    }
+
+    @Override
+    public Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end) {
+        return transactionRepository.findAllByTransactionDateBetween(end, start).map(transactionEntityMapper::toModel);
+    }
+
+    @Override
+    public Mono<ContentPage<Transaction>> findAllTransactionsPageable(int page, int size, UUID clientId, String type) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Flux<Transaction> data = manualRepository.findAllTransactions(clientId, type)
+          .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+          .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+          .take(pageable.getPageSize());
+
+        Mono<Long> total = manualRepository.countAllTransactions(clientId, type);
+
+        return getContentPageMono(page, size, data, total);
+    }
+
+    private Mono<ContentPage<Transaction>> getContentPageMono(int page, int size, Flux<Transaction> data, Mono<Long> total) {
+        return data
+          .collectList()
+          .zipWith(total)
+          .map(tuple -> {
+              List<Transaction> content = tuple.getT1();
+              long totalElements = tuple.getT2();
+              int totalPages = (int) Math.ceil((double) totalElements / (double) size);
+
+              ContentPage<Transaction> contentPage = new ContentPage<>();
+              contentPage.setTotalPage(totalPages);
+              contentPage.setTotalElements(totalElements);
+              contentPage.setPageNumber(page);
+              contentPage.setPageSize(size);
+              contentPage.setFirst(page == 0);
+              contentPage.setLast(page + 1 >= totalPages);
+              contentPage.setContent(content);
+
+              return contentPage;
+          });
+    }
+
+    @Override
+    public Mono<ContentPage<Transaction>> findAllTransactionsByDatePageable(int page, int size, LocalDate start, LocalDate end, UUID clientId, String type) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "transactionDate");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Flux<Transaction> data = manualRepository.findTransactionsByDate(start, end, clientId, type)
+          .sort((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+          .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+          .take(pageable.getPageSize());
+
+        Mono<Long> total = manualRepository.countAllTransactionsByDate(start, end, clientId, type);
+
+        return getContentPageMono(page, size, data, total);
+    }
+
+    @Override
+    public Mono<Void> deleteTransactionById(UUID id) {
+        return manualRepository.callSpDeleteTransaction(id);
+    }
+
+    @Override
+    public Mono<Void> deleteBuyTransactionById(UUID id) {
+        return manualRepository.callSpDeleteBuyTransaction(id);
+    }
+
+    @Override
+    public Mono<Boolean> transactionExists(UUID id) {
+        return transactionRepository.findById(id).hasElement();
+    }
+
+    @Override
+    public Mono<Boolean> isBuyTypeTransaction(UUID id) {
+        return transactionRepository.isBuyTypeTransaction(id);
+    }
+
+}
