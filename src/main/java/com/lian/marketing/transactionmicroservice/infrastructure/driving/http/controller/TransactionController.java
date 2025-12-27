@@ -11,6 +11,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,9 +30,10 @@ public class TransactionController {
 
     @PostMapping
     public Mono<ResponseEntity<Void>> saveTransaction(
-            @Valid @RequestBody CompleteCreateTransactionRequest request
-            ) {
-        return transactionHandler.saveTransaction(request).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
+          @Valid @RequestBody CompleteCreateTransactionRequest request,
+          @AuthenticationPrincipal(expression = "subject") String userId
+      ) {
+        return transactionHandler.saveTransaction(request, userId).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
     }
 
     @GetMapping(value = "/download/report", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)

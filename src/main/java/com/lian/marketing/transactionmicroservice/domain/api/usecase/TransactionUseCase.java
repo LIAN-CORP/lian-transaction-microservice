@@ -50,8 +50,9 @@ public class TransactionUseCase implements ITransactionServicePort {
     }
 
     @Override
-    public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction) {
+    public Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction, String userId) {
         String type = completeTransaction.getTransaction().getTypeMovement().name();
+        completeTransaction.getTransaction().setUserId(UUID.fromString(userId));
         return switch (type) {
             case GeneralConstants.SELL_TRANSACTION -> processSellTransaction(completeTransaction);
             case GeneralConstants.BUY_TRANSACTION -> processBuyTransaction(completeTransaction);

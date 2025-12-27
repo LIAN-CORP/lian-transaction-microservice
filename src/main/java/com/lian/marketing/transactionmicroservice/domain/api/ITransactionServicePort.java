@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface ITransactionServicePort {
     Mono<UUID> createTransaction(Transaction transaction);
-    Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction);
+    Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction, String userId);
     Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end);
     Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end);
     Mono<ContentPage<Transaction>> findAllTransactionsByDate(int page, int size, String start, String end, UUID clientId, String type);
