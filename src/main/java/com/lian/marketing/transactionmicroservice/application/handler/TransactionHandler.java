@@ -19,8 +19,8 @@ public class TransactionHandler {
     private final ICompleteTransactionMapper transactionMapper;
     private final ITransactionServicePort transactionServicePort;
 
-    public Mono<Void> saveTransaction(CompleteCreateTransactionRequest request) {
-        return transactionServicePort.createCompleteTransaction(transactionMapper.toModelFromRequest(request));
+    public Mono<Void> saveTransaction(CompleteCreateTransactionRequest request, String userId) {
+        return transactionServicePort.createCompleteTransaction(transactionMapper.toModelFromRequest(request), userId);
     }
 
     public Mono<ContentPage<Transaction>> findAllTransactions(int page, int size, String start, String end, UUID clientId, String type) {
