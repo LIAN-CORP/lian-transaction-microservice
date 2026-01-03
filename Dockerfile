@@ -16,7 +16,7 @@ RUN ./gradlew clean build -x test --no-daemon
 # ============================================
 # RUNTIME STAGE
 # ============================================
-FROM amazoncorretto:21-alpine-jdk
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
