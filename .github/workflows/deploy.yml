@@ -1,0 +1,30 @@
+name: Deploy Transaction Microservice
+
+on:
+  pull_request:
+    branches: [ main ]
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    uses: lian-corp/lian-devops/.github/workflows/build-deploy-ec2.yml@main
+    with:
+      image_name: lian-corp/lian-transaction-microservice
+      service_name: transaction-ms
+      deploy_path: /home/ec2-user/docker/micros
+    secrets:
+      EC2_HOST: ${{ secrets.EC2_CORE_HOST }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      EC2_KEY: ${{ secrets.EC2_CORE_KEY }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    permissions:
+      contents: read
+      packages: write
