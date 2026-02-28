@@ -5,6 +5,7 @@ import com.lian.marketing.transactionmicroservice.application.mapper.ICompleteTr
 import com.lian.marketing.transactionmicroservice.domain.api.ITransactionServicePort;
 import com.lian.marketing.transactionmicroservice.domain.model.ContentPage;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import com.lian.marketing.transactionmicroservice.domain.model.TransactionDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,5 +30,9 @@ public class TransactionHandler {
 
     public Mono<Void> deleteTransactionById(UUID id){
         return transactionServicePort.deleteTransactionById(id);
+    }
+
+    public Mono<TransactionDetail> findCompleteTransactionById(UUID id) {
+        return transactionServicePort.findTransactionDetailById(id);
     }
 }

@@ -5,6 +5,7 @@ import com.lian.marketing.transactionmicroservice.application.handler.ReportHand
 import com.lian.marketing.transactionmicroservice.application.handler.TransactionHandler;
 import com.lian.marketing.transactionmicroservice.domain.model.ContentPage;
 import com.lian.marketing.transactionmicroservice.domain.model.Transaction;
+import com.lian.marketing.transactionmicroservice.domain.model.TransactionDetail;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -62,5 +62,10 @@ public class TransactionController {
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteTransactionById(@PathVariable("id") UUID id) {
         return transactionHandler.deleteTransactionById(id).then(Mono.defer(() -> Mono.just(ResponseEntity.ok().build())));
+    }
+
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<Mono<TransactionDetail>>> findCompleteTransactionById(@PathVariable("id") UUID id){
+        return transactionHandler.findCompleteTransactionById(id).map(t -> ResponseEntity.ok().body(Mono.just(t)));
     }
 }

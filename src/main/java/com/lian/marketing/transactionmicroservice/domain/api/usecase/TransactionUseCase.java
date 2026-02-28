@@ -97,6 +97,21 @@ public class TransactionUseCase implements ITransactionServicePort {
         });
     }
 
+    @Override
+    public Mono<TransactionDetail> findTransactionDetailById(UUID id) {
+        return transactionPersistencePort.findTransactionDetailById(id)
+          .switchIfEmpty(Mono.error(new TransactionDoNotExistsException(GeneralConstants.TRANSACTION_NOT_FOUND)))
+          .flatMap(transaction ->
+              this.detailTransactionServicePort.findDetailTransactionsByTransactionId(id)
+                .map(details -> {
+                    TransactionDetail transactionDetail = new TransactionDetail();
+                    transactionDetail.setTransaction(transaction);
+                    transactionDetail.setDetail(details);
+                    return transactionDetail;
+                })
+          );
+    }
+
     private Mono<Void> processSellTransaction(CompleteTransaction completeTransaction) {
         if(completeTransaction.getPaymentMethod() == null){
             return Mono.error(new PaymentMethodIsRequiredException(GeneralConstants.PAYMENT_METHOD_FOR_SELL_TRANSACTION_IS_REQUIRED));

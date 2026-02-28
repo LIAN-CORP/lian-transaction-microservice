@@ -22,4 +22,5 @@ public interface ITransactionPersistencePort {
     Mono<Void> deleteBuyTransactionById(UUID id);
     Mono<Boolean> transactionExists(UUID id);
     Mono<Boolean> isBuyTypeTransaction(UUID id);
+    Mono<Transaction> findTransactionDetailById(UUID id);
 }
