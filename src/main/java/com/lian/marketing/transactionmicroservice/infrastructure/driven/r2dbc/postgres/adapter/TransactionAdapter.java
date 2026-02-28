@@ -192,4 +192,9 @@ public class TransactionAdapter implements ITransactionPersistencePort {
         return transactionRepository.isBuyTypeTransaction(id);
     }
 
+    @Override
+    public Mono<Transaction> findTransactionDetailById(UUID id) {
+        return transactionRepository.findById(id).map(transactionEntityMapper::toModel);
+    }
+
 }
