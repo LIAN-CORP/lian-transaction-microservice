@@ -11,7 +11,6 @@ import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.po
 import com.lian.marketing.transactionmicroservice.infrastructure.driven.r2dbc.postgres.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -195,6 +194,25 @@ public class TransactionAdapter implements ITransactionPersistencePort {
     @Override
     public Mono<Transaction> findTransactionDetailById(UUID id) {
         return transactionRepository.findById(id).map(transactionEntityMapper::toModel);
+    }
+
+    @Override
+    public Mono<UUID> findMostRecentCreditTransactionIdByClientId(UUID clientId) {
+        return transactionRepository.findRecentCreditTransactionByClientId(clientId);
+    }
+
+    @Override
+    public Mono<Boolean> findActiveDebtByClientId(UUID clientId) {
+        return paymentWebClient.get()
+                .uri("/debt/active/client/{clientId}", clientId.toString())
+                .retrieve()
+                .onStatus(HttpStatus.NO_CONTENT::equals, response -> Mono.empty())
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> Mono.empty())
+                .bodyToMono(Boolean.class)
+                .onErrorResume(e -> {
+                    log.info("Error checking active debt for client {}: {}", clientId, e.getMessage());
+                    return Mono.just(false);
+                });
     }
 
 }

@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class TransactionUseCase implements ITransactionServicePort {
 
 
     @Override
-    public Mono<UUID> createTransaction(Transaction transaction) {
+    public Mono<UUID> createTransaction(Transaction transaction, boolean isCredit) {
         String phone = DomainUtils.transformPhoneNumber(transaction.getClient().getPhone());
         transaction.getClient().setPhone(phone);
         return transactionPersistencePort.userExists(transaction.getUserId())
@@ -38,13 +39,29 @@ public class TransactionUseCase implements ITransactionServicePort {
                 .switchIfEmpty(Mono.error(new UserDoNotExistsException(GeneralConstants.USER_DO_NOT_EXISTS)))
                 .then(clientServicePort.existsByPhone(transaction.getClient().getPhone()))
                 .flatMap(client -> {
-                    Mono<UUID> saveClientIfNeeded = client ? clientServicePort.findIdByPhone(transaction.getClient().getPhone()) : clientServicePort.saveClientAndGetId(transaction.getClient());
+                    Mono<UUID> saveClientIfNeeded = Boolean.TRUE.equals(client)
+                            ? clientServicePort.findIdByPhone(transaction.getClient().getPhone())
+                            : clientServicePort.saveClientAndGetId(transaction.getClient());
 
                     return saveClientIfNeeded.flatMap(clientId -> {
-                       transaction.getClient().setId(clientId);
-                       transaction.setTransactionDate(LocalDate.now());
-                       log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
-                       return transactionPersistencePort.saveTransaction(transaction);
+                      transaction.getClient().setId(clientId);
+                      if(isCredit){
+                        return transactionPersistencePort.findActiveDebtByClientId(clientId)
+                          .flatMap(isActive -> {
+                            if(Boolean.TRUE.equals(isActive)){
+                              return transactionPersistencePort.findMostRecentCreditTransactionIdByClientId(clientId)
+                                .flatMap(Mono::just);
+                            }
+                            //transaction.getClient().setId(clientId);
+                            transaction.setTransactionDate(LocalDateTime.now());
+                            log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
+                            return transactionPersistencePort.saveTransaction(transaction);
+                          });
+                      }
+                      //transaction.getClient().setId(clientId);
+                      transaction.setTransactionDate(LocalDateTime.now());
+                      log.info(GeneralConstants.SAVING_TRANSACTION_SFL4J, transaction);
+                      return transactionPersistencePort.saveTransaction(transaction);
                     });
                 });
     }
@@ -85,11 +102,11 @@ public class TransactionUseCase implements ITransactionServicePort {
     @Override
     public Mono<Void> deleteTransactionById(UUID id) {
         return transactionPersistencePort.transactionExists(id).flatMap(r -> {
-            if(!r){
+            if(!Boolean.TRUE.equals(r)){
                 return Mono.error(new TransactionDoNotExistsException(GeneralConstants.TRANSACTION_NOT_FOUND));
             }
             return transactionPersistencePort.isBuyTypeTransaction(id).flatMap(t -> {
-                if(!t){
+                if(!Boolean.TRUE.equals(t)){
                     return transactionPersistencePort.deleteTransactionById(id);
                 }
                 return transactionPersistencePort.deleteBuyTransactionById(id);
@@ -117,7 +134,7 @@ public class TransactionUseCase implements ITransactionServicePort {
             return Mono.error(new PaymentMethodIsRequiredException(GeneralConstants.PAYMENT_METHOD_FOR_SELL_TRANSACTION_IS_REQUIRED));
         }
         return discountProductStock(completeTransaction.getProducts())
-                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .then(this.createTransaction(completeTransaction.getTransaction(), false))
                 .flatMap(transactionId ->
                     createDetailAndPayment(completeTransaction, transactionId)
                 );
@@ -125,7 +142,7 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     private Mono<Void> processBuyTransaction(CompleteTransaction completeTransaction) {
         return addProductStock(completeTransaction.getProducts())
-                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .then(this.createTransaction(completeTransaction.getTransaction(), false))
                 .flatMap(transactionId -> detailTransactionServicePort.createDetailTransaction(
                                 new DetailTransaction(null, null, null, transactionId, null),
                                 completeTransaction.getProducts(),
@@ -136,7 +153,7 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     private Mono<Void> processCreditTransaction(CompleteTransaction completeTransaction) {
         return discountProductStock(completeTransaction.getProducts())
-                .then(this.createTransaction(completeTransaction.getTransaction()))
+                .then(this.createTransaction(completeTransaction.getTransaction(), true))
                 .flatMap(transactionId ->
                         createDetailAndDebt(completeTransaction, transactionId)
                 );
@@ -153,13 +170,16 @@ public class TransactionUseCase implements ITransactionServicePort {
                 completeTransaction.getTransaction().getTypeMovement().name()
             )
             .then(detailTransactionServicePort.getTotalAmountByTransactionId(transactionId))
-            .flatMap(amount -> transactionPersistencePort.sendCreditToMicroservice(
-                        new CreditTransaction(
-                                BigDecimal.valueOf(amount),
-                                completeTransaction.getTransaction().getClient().getId(),
-                                transactionId
-                        )
-                ));
+            .flatMap(amount -> {
+                CreditTransaction credit = new CreditTransaction(
+                  BigDecimal.valueOf(amount),
+                  completeTransaction.getTransaction().getClient().getId(),
+                  transactionId
+                );
+                return transactionPersistencePort.sendCreditToMicroservice( credit );
+              }
+            )
+            .then();
     }
 
     private Mono<Void> createDetailAndPayment(CompleteTransaction completeTransaction, UUID transactionId) {

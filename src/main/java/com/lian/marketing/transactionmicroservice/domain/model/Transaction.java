@@ -2,7 +2,7 @@ package com.lian.marketing.transactionmicroservice.domain.model;
 
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -14,7 +14,7 @@ public class Transaction {
 
     private UUID id;
     private type_movement typeMovement;
-    private LocalDate transactionDate;
+    private LocalDateTime transactionDate;
     private Client client;
     private UUID userId;
 

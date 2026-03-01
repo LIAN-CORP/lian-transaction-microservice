@@ -23,4 +23,6 @@ public interface ITransactionPersistencePort {
     Mono<Boolean> transactionExists(UUID id);
     Mono<Boolean> isBuyTypeTransaction(UUID id);
     Mono<Transaction> findTransactionDetailById(UUID id);
+    Mono<Boolean> findActiveDebtByClientId(UUID clientId);
+    Mono<UUID> findMostRecentCreditTransactionIdByClientId(UUID clientId);
 }
