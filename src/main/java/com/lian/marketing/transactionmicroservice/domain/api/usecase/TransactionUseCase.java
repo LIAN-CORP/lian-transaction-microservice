@@ -80,6 +80,7 @@ public class TransactionUseCase implements ITransactionServicePort {
 
     @Override
     public Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end) {
+        end = end.plusDays(1);
         return transactionPersistencePort.findAllTransactionsByDateRange(start, end);
     }
 
@@ -93,7 +94,7 @@ public class TransactionUseCase implements ITransactionServicePort {
 
         if(start != null && end != null){
             LocalDate dateStart = LocalDate.parse(start);
-            LocalDate dateEnd = LocalDate.parse(end);
+            LocalDate dateEnd = LocalDate.parse(end).plusDays(1);
             return transactionPersistencePort.findAllTransactionsByDatePageable(page, size, dateStart, dateEnd, clientId, type);
         }
         return transactionPersistencePort.findAllTransactionsPageable(page, size, clientId, type);
