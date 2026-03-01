@@ -10,10 +10,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public interface TransactionRepository extends ReactiveCrudRepository<TransactionEntity, UUID> {
-    @Query("SELECT * FROM transactions t INNER JOIN client c on c.id = t.client_id WHERE t.transaction_date BETWEEN :start AND :end")
+    @Query("SELECT * FROM transactions t INNER JOIN client c on c.id = t.client_id WHERE t.transaction_date BETWEEN :start AND :end ORDER BY t.transaction_date DESC")
     Flux<TransactionEntity> findAllByTransactionDateBetween(LocalDate transactionDateAfter, LocalDate transactionDateBefore);
 
-    @Query("SELECT * FROM transactions t INNER JOIN client c on c.id = t.client_id")
+    @Query("SELECT * FROM transactions t INNER JOIN client c on c.id = t.client_id ORDER BY t.transaction_date DESC")
     Flux<TransactionEntity> findAll();
 
     Mono<Long> countByTransactionDateBetween(LocalDate transactionDateAfter, LocalDate transactionDateBefore);
