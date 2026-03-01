@@ -21,4 +21,6 @@ public interface TransactionRepository extends ReactiveCrudRepository<Transactio
     @Query("SELECT EXISTS(SELECT 1 FROM transactions WHERE type_movement = 'COMPRA' AND id = :id)")
     Mono<Boolean> isBuyTypeTransaction(UUID id);
 
+    @Query("SELECT t.id FROM transactions t WHERE t.client_id = :clientId AND t.type_movement = 'CREDITO' ORDER BY t.transaction_date DESC LIMIT 1")
+    Mono<UUID> findRecentCreditTransactionByClientId(UUID clientId);
 }

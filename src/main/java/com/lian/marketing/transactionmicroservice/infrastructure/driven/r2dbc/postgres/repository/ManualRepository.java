@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class ManualRepository {
       .flatMap(r -> r.map((row, meta) -> {
         Transaction transaction = new Transaction();
         transaction.setId(row.get("id", UUID.class));
-        transaction.setTransactionDate(row.get("transaction_date", LocalDate.class));
+        transaction.setTransactionDate(row.get("transaction_date", LocalDateTime.class));
         transaction.setTypeMovement(type_movement.valueOf(row.get("type_movement", String.class)));
         transaction.setUserId(row.get("user_id", UUID.class));
         Client client = new Client();
@@ -109,7 +110,7 @@ public class ManualRepository {
       .flatMap(r -> r.map((row, meta)-> {
         Transaction transaction = new Transaction();
         transaction.setId(row.get("id", UUID.class));
-        transaction.setTransactionDate(row.get("transaction_date", LocalDate.class));
+        transaction.setTransactionDate(row.get("transaction_date", LocalDateTime.class));
         transaction.setTypeMovement(type_movement.valueOf(row.get("type_movement", String.class)));
         transaction.setUserId(row.get("user_id", UUID.class));
         Client client = new Client();

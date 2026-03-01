@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public interface ITransactionServicePort {
-    Mono<UUID> createTransaction(Transaction transaction);
+    Mono<UUID> createTransaction(Transaction transaction, boolean isCredit);
     Mono<Void> createCompleteTransaction(CompleteTransaction completeTransaction, String userId);
     Flux<Transaction> findAllTransactionsByDateRange(LocalDate start, LocalDate end);
     Flux<DebtTransactionExcel> findAllDebtsByDateRange(LocalDate start, LocalDate end);
